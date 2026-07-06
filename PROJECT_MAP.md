@@ -1,7 +1,7 @@
 # PROJECT_MAP — PassGo
 
 > **Last Updated:** 2026-07-06  
-> **Status:** Milestone 2 — Vault Core (Complete)  
+> **Status:** Milestone 3A — Autofill Foundation (Complete)  
 > **Target Platform:** Android 16 (API 36)
 
 ---
@@ -60,7 +60,16 @@ com.passgo.app/
  ├── di/                     # AppModule, DatabaseModule
  └── feature/
      ├── home/               # HomeScreen (dashboard with stats, security status, tip card)
-     ├── vault/              # VaultScreen (items list placeholder)
+     ├── vault/              # VaultScreen (items list with CRUD), Add/Edit, ItemDetail
+     ├── autofill/            # PassGoAutofillService + session/parser/matcher/dataset/domain
+     │   ├── service/        # PassGoAutofillService (@AndroidEntryPoint)
+     │   ├── session/        # AutofillSession lifecycle manager
+     │   ├── parser/         # RequestParser (AssistStructure -> AutofillRequest)
+     │   ├── matcher/        # FieldMatcher (username/email/password field detection)
+     │   ├── dataset/        # DatasetBuilder (Autofill Dataset + SaveInfo)
+     │   ├── response/       # ResponseBuilder (FillResponse construction)
+     │   ├── domain/         # DomainHandler (website/package name normalization)
+     │   └── model/          # AutofillField, AutofillRequest, AutofillCredential, SessionState
      ├── premium/            # PremiumScreen (upgrade placeholder)
      ├── settings/           # SettingsScreen (theme, auto-lock, version)
      ├── setup/              # SetupScreen (master password creation)
@@ -134,6 +143,7 @@ App → MasterKeyManager.getOrCreateMasterKey() → KeyStoreManager (KeyStore AE
 | `data.settings` | Theme mode, auto-lock, language, security tips | `ThemeMode.kt`, `UserPreferences.kt` (DataStore) |
 | `feature.home` | Dashboard with stats, vault status, security tip, FAB | `HomeScreen.kt`, `HomeViewModel.kt` |
 | `feature.vault` | Vault item list, add/edit form, item detail | `VaultScreen.kt`, `VaultViewModel.kt`, `AddEditItemScreen.kt`, `AddEditItemViewModel.kt`, `ItemDetailScreen.kt`, `ItemDetailViewModel.kt` |
+| `feature.autofill` | Android Autofill Framework service, session, parser, field matcher, dataset builder, domain handler | `PassGoAutofillService.kt`, `AutofillSession.kt`, `RequestParser.kt`, `FieldMatcher.kt`, `DatasetBuilder.kt`, `ResponseBuilder.kt`, `DomainHandler.kt`, `AutofillField.kt`, `AutofillRequest.kt`, `AutofillCredential.kt`, `SessionState.kt` |
 | `feature.premium` | Premium upgrade (placeholder) | `PremiumScreen.kt` |
 | `feature.settings` | Theme selection, auto-lock timer, app version | `SettingsScreen.kt`, `SettingsViewModel.kt` |
 | `feature.setup` | Master password creation | `SetupScreen.kt`, `SetupViewModel.kt` |
@@ -251,10 +261,11 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 |---|---|---|
 | M0 | **Foundation** (✅ Done) | `gradlew assembleDebug` succeeds; 4 placeholder screens render |
 | M1 | **Database + Cryptography** (✅ Done) | Room + SQLCipher DB; KeyStore key protection; repository layer; tests pass |
-| M2 | Vault Core | ✅ Complete — CRUD, 12 categories, search/sort/filter, password generator, strength indicator, item detail with copy/show/open |
-| M3 | Vault Features | Password generator, TOTP, categories, search |
-| M4 | Autofill + Export | Android Autofill Service; CSV/JSON export/import |
-| M5 | Security + Polish | Auto-clear clipboard; security audit; accessibility |
+| M2 | **Vault Core** (✅ Done) | CRUD, 12 categories, search/sort/filter, password generator, strength indicator, item detail with copy/show/open |
+| M3A | **Autofill Foundation** (✅ Done) | AutofillService registered, session lifecycle, field detection, domain handling, response builder, all compile |
+| M3B | **Autofill Filling** (⏳ Pending) | Actual credential filling via autofill datasets, save support, inline suggestions |
+| M4 | **Vault Features** (⏳ Pending) | TOTP, tags, bulk operations, trash management |
+| M5 | **Security + Polish** (⏳ Pending) | Auto-clear clipboard, security audit, accessibility, crash reporting |
 
 ---
 
@@ -385,6 +396,60 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 - [x] AppResult consistently checked in all ViewModels
 - [x] Sensitive info never logged
 - [x] URL open handles invalid protocols safely
+
+### Milestone 3A — Autofill Foundation (✅ Complete)
+
+#### Service Registration
+- [x] `PassGoAutofillService` with `@AndroidEntryPoint` (Hilt DI)
+- [x] Manifest: `BIND_AUTOFILL_SERVICE` permission, service with `<intent-filter>`, `<meta-data>` config
+- [x] XML config: `res/xml/autofill_service_config.xml`
+- [x] Service visible in Android Autofill settings when installed
+
+#### Session Architecture
+- [x] `AutofillSession`: lifecycle manager with `SessionState` machine (CREATED → PARSING → PARSED → RESPONDING → RESPONDED → FINISHED / CANCELLED)
+- [x] New session per request via `Provider<AutofillSession>`
+- [x] Per-request cancellation via `CancellationSignal`
+- [x] Save request handler (infrastructure only, no save logic yet)
+
+#### Request Parsing
+- [x] `RequestParser`: parses `AssistStructure` into `AutofillRequest`
+- [x] Window-by-window traversal of view hierarchy
+- [x] AutofillId extraction, focused field detection
+- [x] Package name extraction from `ComponentName`
+
+#### Field Detection
+- [x] `FieldMatcher`: classifies fields as USERNAME / EMAIL / PASSWORD / UNKNOWN
+- [x] Detection via `inputType` variations (PASSWORD, EMAIL_ADDRESS, PERSON_NAME)
+- [x] Detection via `autofillHints` (username, email, password, etc.)
+- [x] Partial-match fallback for compound hints
+- [x] `hasLoginFields()`: requires at least 1 password + 1 username/email
+
+#### Domain Recognition
+- [x] `DomainHandler`: URL domain extraction via `URI`
+- [x] Known app package → domain mapping (Gmail, Facebook, Twitter, LinkedIn, Slack, Outlook, Netflix, Amazon, etc.)
+- [x] Domain normalization (lowercase, strip www.)
+- [x] Subdomain-aware matching
+
+#### Dataset & Response Foundation
+- [x] `DatasetBuilder`: builds `Dataset` with username/email/password field values + presentation
+- [x] `DatasetBuilder.buildSaveDataset()`: builds `SaveInfo` with required/optional IDs
+- [x] `ResponseBuilder`: assembles `FillResponse` with datasets + save info
+- [x] Support for API 26+ (minSdk) with API 30+ improvements
+
+#### Repository Integration
+- [x] `AutofillSession` receives `RequestParser`, `ResponseBuilder`, `DomainHandler`, `FieldMatcher` via Hilt
+- [x] Ready to integrate `VaultItemRepository` (M3B) for credential lookup
+
+#### Security & Logging
+- [x] Never logs credentials: log messages are "Session started", "Session finished", "No autofillable fields detected", "Unsupported screen", "Matching attempt"
+- [x] Passwords, usernames, emails never appear in log statements
+- [x] No sensitive values exposed in Dataset or SaveInfo building
+
+#### Build Verification
+- [x] `assembleDebug` — zero errors, zero warnings
+- [x] `testDebugUnitTest` — passes
+- [x] No deprecated API usage
+- [x] No TODO/FIXME/HACK
 
 ---
 
@@ -532,4 +597,33 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 | `README.md` | Updated features, screens, milestone status |
 | `PROJECT_MAP.md` | This file — updated throughout |
 
-**Files kept** from M0/M1: `PassGoApplication.kt`, theme (`Color.kt`, `Type.kt`), logging (`PassGoLogger.kt`, `LogLevel.kt`), `PassGoApplication.kt`, `AndroidManifest.xml`, `gradle/libs.versions.toml`,`.gitignore`, launcher icon resources, `PremiumScreen.kt`.
+### Milestone 3A — New Files
+
+**Autofill Feature**
+| File | Lines | Purpose |
+|---|---|---|
+| `feature/autofill/service/PassGoAutofillService.kt` | 44 | Main AutofillService with `@AndroidEntryPoint` Hilt DI |
+| `feature/autofill/session/AutofillSession.kt` | 90 | Session lifecycle state machine |
+| `feature/autofill/parser/RequestParser.kt` | 115 | `AssistStructure` → `AutofillRequest` parser |
+| `feature/autofill/matcher/FieldMatcher.kt` | 104 | Username/email/password field classification |
+| `feature/autofill/dataset/DatasetBuilder.kt` | 80 | Dataset + SaveInfo builder for Autofill |
+| `feature/autofill/response/ResponseBuilder.kt` | 46 | FillResponse builder |
+| `feature/autofill/domain/DomainHandler.kt` | 82 | Domain normalization, package→domain mapping |
+| `feature/autofill/model/AutofillField.kt` | 19 | Parsed field representation |
+| `feature/autofill/model/AutofillRequest.kt` | 9 | Parsed request model |
+| `feature/autofill/model/AutofillCredential.kt` | 8 | Credential data model |
+| `feature/autofill/model/SessionState.kt` | 11 | Session state enum |
+
+**XML Configuration**
+| File | Purpose |
+|---|---|
+| `res/xml/autofill_service_config.xml` | Autofill service configuration |
+
+### Milestone 3A — Modified Files
+| File | Changes |
+|---|---|
+| `AndroidManifest.xml` | Added `BIND_AUTOFILL_SERVICE` permission, `PassGoAutofillService` with intent-filter and meta-data |
+| `PROJECT_MAP.md` | Added M3A sections, autofill package structure, milestone plan |
+| `README.md` | _(no changes needed — autofill is infrastructure, not user-facing feature)_ |
+
+**Files kept** from M0/M1/M2: All existing files — `DatabaseModule` provides all repositories needed for M3B credential lookup.
