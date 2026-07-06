@@ -69,8 +69,11 @@ class DatasetBuilder @Inject constructor() {
     }
 
     private fun createPresentation(credential: AutofillCredential): RemoteViews {
-        val displayLabel = credential.username.ifEmpty { credential.email }
-        val displayText = if (displayLabel.isNotEmpty()) displayLabel else credential.id
+        val displayLabel = credential.name.ifEmpty { credential.username.ifEmpty { credential.email } }
+        val displaySubtext = credential.username.ifEmpty { credential.email }.let {
+            if (it.isNotEmpty() && it != displayLabel) " ($it)" else ""
+        }
+        val displayText = "$displayLabel$displaySubtext"
 
         val layoutId = android.R.layout.simple_list_item_1
         val presentation = RemoteViews(packageName, layoutId)

@@ -1,7 +1,7 @@
 # PROJECT_MAP — PassGo
 
 > **Last Updated:** 2026-07-06  
-> **Status:** Milestone 3A — Autofill Foundation (Complete)  
+> **Status:** Milestone 3B — Autofill Engine (Complete)  
 > **Target Platform:** Android 16 (API 36)
 
 ---
@@ -27,8 +27,8 @@
 
 | Technology | Milestone | Purpose |
 |---|---|---|
-| Biometric (AndroidX) | M2 | Fingerprint/face unlock |
-| Android Autofill Framework | M4 | Autofill in other apps |
+| Biometric (AndroidX) | M3C | Fingerprint/face unlock for autofill |
+| Android Autofill Framework | M3C | Inline suggestions, custom presentation |
 
 ---
 
@@ -61,15 +61,16 @@ com.passgo.app/
  └── feature/
      ├── home/               # HomeScreen (dashboard with stats, security status, tip card)
      ├── vault/              # VaultScreen (items list with CRUD), Add/Edit, ItemDetail
-     ├── autofill/            # PassGoAutofillService + session/parser/matcher/dataset/domain
-     │   ├── service/        # PassGoAutofillService (@AndroidEntryPoint)
-     │   ├── session/        # AutofillSession lifecycle manager
-     │   ├── parser/         # RequestParser (AssistStructure -> AutofillRequest)
-     │   ├── matcher/        # FieldMatcher (username/email/password field detection)
-     │   ├── dataset/        # DatasetBuilder (Autofill Dataset + SaveInfo)
-     │   ├── response/       # ResponseBuilder (FillResponse construction)
-     │   ├── domain/         # DomainHandler (website/package name normalization)
-     │   └── model/          # AutofillField, AutofillRequest, AutofillCredential, SessionState
+      ├── autofill/            # PassGoAutofillService + session/parser/matcher/dataset/domain/repository
+      │   ├── service/        # PassGoAutofillService (@AndroidEntryPoint)
+      │   ├── session/        # AutofillSession lifecycle manager
+      │   ├── parser/         # RequestParser (AssistStructure -> AutofillRequest)
+      │   ├── matcher/        # FieldMatcher + CredentialMatcher (field + domain matching)
+      │   ├── dataset/        # DatasetBuilder (Autofill Dataset + SaveInfo)
+      │   ├── response/       # ResponseBuilder (FillResponse construction)
+      │   ├── domain/         # DomainHandler (website/package name normalization)
+      │   ├── repository/     # AutofillRepository (vault integration)
+      │   └── model/          # AutofillField, AutofillRequest, AutofillCredential, SessionState
      ├── premium/            # PremiumScreen (upgrade placeholder)
      ├── settings/           # SettingsScreen (theme, auto-lock, version)
      ├── setup/              # SetupScreen (master password creation)
@@ -143,7 +144,7 @@ App → MasterKeyManager.getOrCreateMasterKey() → KeyStoreManager (KeyStore AE
 | `data.settings` | Theme mode, auto-lock, language, security tips | `ThemeMode.kt`, `UserPreferences.kt` (DataStore) |
 | `feature.home` | Dashboard with stats, vault status, security tip, FAB | `HomeScreen.kt`, `HomeViewModel.kt` |
 | `feature.vault` | Vault item list, add/edit form, item detail | `VaultScreen.kt`, `VaultViewModel.kt`, `AddEditItemScreen.kt`, `AddEditItemViewModel.kt`, `ItemDetailScreen.kt`, `ItemDetailViewModel.kt` |
-| `feature.autofill` | Android Autofill Framework service, session, parser, field matcher, dataset builder, domain handler | `PassGoAutofillService.kt`, `AutofillSession.kt`, `RequestParser.kt`, `FieldMatcher.kt`, `DatasetBuilder.kt`, `ResponseBuilder.kt`, `DomainHandler.kt`, `AutofillField.kt`, `AutofillRequest.kt`, `AutofillCredential.kt`, `SessionState.kt` |
+| `feature.autofill` | Android Autofill Framework service, session, parser, field matcher, credential matcher, dataset builder, domain handler, repository, response builder | `PassGoAutofillService.kt`, `AutofillSession.kt`, `RequestParser.kt`, `FieldMatcher.kt`, `CredentialMatcher.kt`, `DatasetBuilder.kt`, `ResponseBuilder.kt`, `DomainHandler.kt`, `AutofillRepository.kt`, `AutofillField.kt`, `AutofillRequest.kt`, `AutofillCredential.kt`, `SessionState.kt` |
 | `feature.premium` | Premium upgrade (placeholder) | `PremiumScreen.kt` |
 | `feature.settings` | Theme selection, auto-lock timer, app version | `SettingsScreen.kt`, `SettingsViewModel.kt` |
 | `feature.setup` | Master password creation | `SetupScreen.kt`, `SetupViewModel.kt` |
@@ -263,7 +264,7 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 | M1 | **Database + Cryptography** (✅ Done) | Room + SQLCipher DB; KeyStore key protection; repository layer; tests pass |
 | M2 | **Vault Core** (✅ Done) | CRUD, 12 categories, search/sort/filter, password generator, strength indicator, item detail with copy/show/open |
 | M3A | **Autofill Foundation** (✅ Done) | AutofillService registered, session lifecycle, field detection, domain handling, response builder, all compile |
-| M3B | **Autofill Filling** (⏳ Pending) | Actual credential filling via autofill datasets, save support, inline suggestions |
+| M3B | **Autofill Engine** (✅ Done) | Vault integration, credential matching, dataset filling, save request handling, auth-aware responses |
 | M4 | **Vault Features** (⏳ Pending) | TOTP, tags, bulk operations, trash management |
 | M5 | **Security + Polish** (⏳ Pending) | Auto-clear clipboard, security audit, accessibility, crash reporting |
 
@@ -451,6 +452,80 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 - [x] No deprecated API usage
 - [x] No TODO/FIXME/HACK
 
+### Milestone 3B — Autofill Engine (✅ Complete)
+
+#### Credential Matching
+- [x] `CredentialMatcher`: matches vault items by domain, normalized domain, subdomain, and known app package domain mapping
+- [x] Sorting: favorites first, recently updated second, alphabetically last
+- [x] Never chooses automatically — presents all matching accounts
+
+#### Vault Integration
+- [x] `AutofillRepository`: integrates `VaultRepository` and `VaultItemRepository` for credential retrieval
+- [x] Passwords decrypted only during fill request processing (SQLCipher transparent decryption)
+- [x] No plaintext password caching; credentials scoped to request lifecycle
+
+#### Dataset Generation
+- [x] Real `AutofillDataset` population with username, email, and password values
+- [x] Presentation shows credential name with username subtitle
+- [x] Multiple datasets supported for multiple matching accounts
+
+#### FillResponse
+- [x] One credential: single dataset response with SaveInfo
+- [x] Multiple credentials: multiple datasets with SaveInfo
+- [x] No credentials: empty response with SaveInfo
+- [x] Graceful handling of all cases
+
+#### SaveRequest Handling
+- [x] Parse `SaveRequest` structure to extract username, email, password values
+- [x] Detect existing vault item by domain/package match for update vs. new creation
+- [x] Update existing: preserves existing username/email if not changed
+- [x] Create new: creates `VaultItem` with `OTHER` category, domain-derived URL
+
+#### Multiple Account Support
+- [x] All matching accounts displayed in autofill dropdown
+- [x] Favorites sorted first
+- [x] Recently updated sorted second
+- [x] Alphabetical by name as final tiebreaker
+
+#### Authentication Flow
+- [x] `SessionManager.isUnlocked()` checked before any vault read
+- [x] Locked vault returns empty response — no credential exposure
+- [x] Locked vault blocks save requests silently
+
+#### Security
+- [x] Passwords exist in memory only during fill request processing
+- [x] No credential logging: log messages are "Matching started", "Matching completed", "N datasets", "SaveRequest received", "Authentication required"
+- [x] No clipboard usage
+- [x] No credential leaks in presentation or log output
+
+#### Performance
+- [x] Single vault query per fill request
+- [x] In-memory filtering for domain matching (avoids multiple DB queries)
+- [x] `runBlocking(Dispatchers.IO)` for synchronous autofill context
+
+#### Error Handling
+- [x] `AppResult` used consistently in repository layer
+- [x] Empty vault: returns empty credentials list, SaveInfo still attached
+- [x] Locked vault: returns empty response with no datasets
+- [x] Corrupted entry or DB failure: caught and logged, returns empty list
+
+#### Logging
+- [x] "Matching started for request: {id}"
+- [x] "No autofillable fields detected"
+- [x] "Unsupported screen — no login fields detected"
+- [x] "Authentication required — vault locked"
+- [x] "Matching attempt for package: {package}"
+- [x] "Matching completed — {count} datasets"
+- [x] "SaveRequest received"
+- [x] "SaveRequest — vault locked, skipping save"
+- [x] Usernames, passwords, emails never appear in log messages
+
+#### Build Verification
+- [x] `assembleDebug` — zero errors, zero warnings
+- [x] `testDebugUnitTest` — passes
+- [x] No deprecated API usage
+- [x] No TODO/FIXME/HACK
+
 ---
 
 ## FILES_CREATED
@@ -627,3 +702,20 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 | `README.md` | _(no changes needed — autofill is infrastructure, not user-facing feature)_ |
 
 **Files kept** from M0/M1/M2: All existing files — `DatabaseModule` provides all repositories needed for M3B credential lookup.
+
+### Milestone 3B — New Files
+
+**Autofill Engine**
+| File | Lines | Purpose |
+|---|---|---|
+| `feature/autofill/matcher/CredentialMatcher.kt` | 37 | Domain-based credential matching with sorted results |
+| `feature/autofill/repository/AutofillRepository.kt` | 107 | Vault integration, credential retrieval, save request handling |
+
+### Milestone 3B — Modified Files
+| File | Lines | Changes |
+|---|---|---|
+| `feature/autofill/model/AutofillCredential.kt` | 8 → 13 | Added `name`, `url`, `favorite`, `createdAt`, `updatedAt` fields |
+| `feature/autofill/session/AutofillSession.kt` | 90 → 197 | Full rewrite: vault integration, auth flow, credential matching, save request parsing, field extraction |
+| `feature/autofill/dataset/DatasetBuilder.kt` | 80 → 83 | Improved presentation with credential name + username subtitle |
+| `feature/autofill/domain/DomainHandler.kt` | 82 → 86 | URL extraction fallback for bare domains (no protocol) |
+| `PROJECT_MAP.md` | — | Added M3B sections, file entries, milestone status |

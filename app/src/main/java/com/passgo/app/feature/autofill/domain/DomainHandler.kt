@@ -10,9 +10,13 @@ class DomainHandler @Inject constructor() {
 
     fun extractDomain(url: String): String? {
         return try {
-            val uri = URI(url)
-            val host = uri.host ?: return null
-            normalizeDomain(host)
+            var uri = URI(url)
+            var host = uri.host
+            if (host == null && !url.contains("://")) {
+                uri = URI("https://$url")
+                host = uri.host
+            }
+            host?.let { normalizeDomain(it) }
         } catch (_: Exception) {
             null
         }
