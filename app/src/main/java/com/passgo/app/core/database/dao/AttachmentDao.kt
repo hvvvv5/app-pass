@@ -25,4 +25,7 @@ interface AttachmentDao {
 
     @Query("UPDATE attachments SET deleted_at = :timestamp, sync_status = 'PENDING_UPDATE' WHERE id = :id")
     suspend fun softDelete(id: String, timestamp: Long = System.currentTimeMillis())
+
+    @Query("DELETE FROM attachments WHERE id = :id")
+    suspend fun permanentDelete(id: String)
 }

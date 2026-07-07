@@ -31,6 +31,10 @@ data class AttachmentEntity(
     val mimeType: String = "application/octet-stream",
     @ColumnInfo(name = "encrypted_file_uri")
     val encryptedFileUri: String = "",
+    @ColumnInfo(name = "encryption_iv")
+    val encryptionIv: ByteArray = byteArrayOf(),
+    @ColumnInfo(name = "content_hash")
+    val contentHash: String = "",
     @ColumnInfo(name = "size_bytes")
     val sizeBytes: Long = 0,
     @ColumnInfo(name = "created_at")

@@ -60,7 +60,7 @@ class MigrationTest {
     }
 
     @Test
-    fun databaseVersion_isSix() {
+    fun databaseVersion_isSeven() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val db = Room.databaseBuilder<PassGoDatabase>(
             context,
@@ -71,7 +71,7 @@ class MigrationTest {
             .build()
 
         val version = db.openHelper.readableDatabase.version
-        assertTrue("Expected version >=6 but got $version", version >= 6)
+        assertTrue("Expected version >=7 but got $version", version >= 7)
 
         db.close()
     }

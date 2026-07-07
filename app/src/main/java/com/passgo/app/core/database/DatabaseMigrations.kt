@@ -95,5 +95,10 @@ object DatabaseMigrations {
         db.execSQL("CREATE INDEX IF NOT EXISTS index_search_history_vault_created ON search_history(vault_id, created_at)")
     }
 
-    val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+    val MIGRATION_6_7 = Migration(6, 7) { db ->
+        db.execSQL("ALTER TABLE attachments ADD COLUMN encryption_iv BLOB NOT NULL DEFAULT x''")
+        db.execSQL("ALTER TABLE attachments ADD COLUMN content_hash TEXT NOT NULL DEFAULT ''")
+    }
+
+    val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
 }

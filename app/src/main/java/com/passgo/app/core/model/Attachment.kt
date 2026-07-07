@@ -6,6 +6,8 @@ data class Attachment(
     val name: String,
     val mimeType: String = "application/octet-stream",
     val encryptedFileUri: String = "",
+    val encryptionIv: ByteArray = byteArrayOf(),
+    val contentHash: String = "",
     val sizeBytes: Long = 0,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
