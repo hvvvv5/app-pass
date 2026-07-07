@@ -414,6 +414,334 @@ class FieldDefinitionTest {
         }
     }
 
+    // ── PassportType ──────────────────────────────────────────
+
+    @Nested
+    inner class PassportTypeTest {
+
+        @Test
+        fun `valid passport type passes validation`() {
+            val result = FieldDefinition.PassportType.validate("Standard")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank passport type fails validation`() {
+            val result = FieldDefinition.PassportType.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── IssuingCountry ─────────────────────────────────────────
+
+    @Nested
+    inner class IssuingCountryTest {
+
+        @Test
+        fun `valid issuing country passes validation`() {
+            val result = FieldDefinition.IssuingCountry.validate("United States")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank issuing country fails validation`() {
+            val result = FieldDefinition.IssuingCountry.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── Nationality ────────────────────────────────────────────
+
+    @Nested
+    inner class NationalityTest {
+
+        @Test
+        fun `valid nationality passes validation`() {
+            val result = FieldDefinition.Nationality.validate("American")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank nationality fails validation`() {
+            val result = FieldDefinition.Nationality.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── PassportExpiry ─────────────────────────────────────────
+
+    @Nested
+    inner class PassportExpiryTest {
+
+        @Test
+        fun `valid expiry passes validation`() {
+            val result = FieldDefinition.PassportExpiry.validate("20301215")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `invalid expiry fails validation`() {
+            val result = FieldDefinition.PassportExpiry.validate("2030")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+
+        @Test
+        fun `formats expiry with dashes`() {
+            assertEquals("2030-12-15", FieldDefinition.PassportExpiry.format("20301215"))
+        }
+
+        @Test
+        fun `parse expiry strips non-digits`() {
+            assertEquals("20301215", FieldDefinition.PassportExpiry.parse("2030-12-15"))
+        }
+    }
+
+    // ── LicenseClass ──────────────────────────────────────────
+
+    @Nested
+    inner class LicenseClassTest {
+
+        @Test
+        fun `valid license class passes validation`() {
+            val result = FieldDefinition.LicenseClass.validate("Class B")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `empty license class passes validation as optional`() {
+            val result = FieldDefinition.LicenseClass.validate("")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+    }
+
+    // ── ResidencePermitNumber ─────────────────────────────────
+
+    @Nested
+    inner class ResidencePermitNumberTest {
+
+        @Test
+        fun `valid permit number passes validation`() {
+            val result = FieldDefinition.ResidencePermitNumber.validate("RP123456")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank permit number fails validation`() {
+            val result = FieldDefinition.ResidencePermitNumber.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── ResidencePermitType ───────────────────────────────────
+
+    @Nested
+    inner class ResidencePermitTypeTest {
+
+        @Test
+        fun `valid permit type passes validation`() {
+            val result = FieldDefinition.ResidencePermitType.validate("Work")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `empty permit type passes validation as optional`() {
+            val result = FieldDefinition.ResidencePermitType.validate("")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+    }
+
+    // ── ResidencePermitExpiry ─────────────────────────────────
+
+    @Nested
+    inner class ResidencePermitExpiryTest {
+
+        @Test
+        fun `valid expiry passes validation`() {
+            val result = FieldDefinition.ResidencePermitExpiry.validate("20251231")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `invalid expiry fails validation`() {
+            val result = FieldDefinition.ResidencePermitExpiry.validate("2025")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+
+        @Test
+        fun `formats expiry with dashes`() {
+            assertEquals("2025-12-31", FieldDefinition.ResidencePermitExpiry.format("20251231"))
+        }
+
+        @Test
+        fun `parse expiry strips non-digits`() {
+            assertEquals("20251231", FieldDefinition.ResidencePermitExpiry.parse("2025-12-31"))
+        }
+    }
+
+    // ── SocialSecurityNumber ──────────────────────────────────
+
+    @Nested
+    inner class SocialSecurityNumberTest {
+
+        @Test
+        fun `valid SSN passes validation`() {
+            val result = FieldDefinition.SocialSecurityNumber.validate("123456789")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `invalid SSN fails validation`() {
+            val result = FieldDefinition.SocialSecurityNumber.validate("12345")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+
+        @Test
+        fun `formats SSN with dashes`() {
+            assertEquals("123-45-6789", FieldDefinition.SocialSecurityNumber.format("123456789"))
+        }
+
+        @Test
+        fun `parse SSN strips non-digits`() {
+            assertEquals("123456789", FieldDefinition.SocialSecurityNumber.parse("123-45-6789"))
+        }
+    }
+
+    // ── TaxId ──────────────────────────────────────────────────
+
+    @Nested
+    inner class TaxIdTest {
+
+        @Test
+        fun `valid Tax ID passes validation`() {
+            val result = FieldDefinition.TaxId.validate("12-3456789")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank Tax ID fails validation`() {
+            val result = FieldDefinition.TaxId.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+
+        @Test
+        fun `format uppercases Tax ID`() {
+            assertEquals("123456789", FieldDefinition.TaxId.format("12-3456789"))
+        }
+
+        @Test
+        fun `parse strips non-alphanumeric`() {
+            assertEquals("123456789", FieldDefinition.TaxId.parse("12-3456789"))
+        }
+    }
+
+    // ── StudentIdNumber ───────────────────────────────────────
+
+    @Nested
+    inner class StudentIdNumberTest {
+
+        @Test
+        fun `valid student ID passes validation`() {
+            val result = FieldDefinition.StudentIdNumber.validate("S12345")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank student ID fails validation`() {
+            val result = FieldDefinition.StudentIdNumber.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── InstitutionName ───────────────────────────────────────
+
+    @Nested
+    inner class InstitutionNameTest {
+
+        @Test
+        fun `valid institution name passes validation`() {
+            val result = FieldDefinition.InstitutionName.validate("MIT")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank institution name fails validation`() {
+            val result = FieldDefinition.InstitutionName.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── HealthInsuranceId ─────────────────────────────────────
+
+    @Nested
+    inner class HealthInsuranceIdTest {
+
+        @Test
+        fun `valid member ID passes validation`() {
+            val result = FieldDefinition.HealthInsuranceId.validate("MEM12345")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `empty member ID passes validation as optional`() {
+            val result = FieldDefinition.HealthInsuranceId.validate("")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+    }
+
+    // ── HealthInsuranceProvider ───────────────────────────────
+
+    @Nested
+    inner class HealthInsuranceProviderTest {
+
+        @Test
+        fun `valid provider passes validation`() {
+            val result = FieldDefinition.HealthInsuranceProvider.validate("Blue Cross")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank provider fails validation`() {
+            val result = FieldDefinition.HealthInsuranceProvider.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── HealthInsuranceGroupNumber ────────────────────────────
+
+    @Nested
+    inner class HealthInsuranceGroupNumberTest {
+
+        @Test
+        fun `valid group number passes validation`() {
+            val result = FieldDefinition.HealthInsuranceGroupNumber.validate("GRP001")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `empty group number passes validation as optional`() {
+            val result = FieldDefinition.HealthInsuranceGroupNumber.validate("")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+    }
+
+    // ── PolicyNumber ──────────────────────────────────────────
+
+    @Nested
+    inner class PolicyNumberTest {
+
+        @Test
+        fun `valid policy number passes validation`() {
+            val result = FieldDefinition.PolicyNumber.validate("POL-12345")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank policy number fails validation`() {
+            val result = FieldDefinition.PolicyNumber.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
     // ── FieldDefinition.lookup ───────────────────────────────
 
     @Nested

@@ -269,6 +269,7 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 | M4B | **Architecture Refinements** (✅ Done) | FieldId enum, FieldDefinition sealed class, CustomField entity/DAO/repository, custom_fields table, unified search via LEFT JOIN, migration 3→4, unit tests |
 | M4C | **Dynamic Vault Type Engine** (✅ Done) | FieldGroup enum, CategoryIconIdentifier, enhanced VaultItemCategory metadata, DynamicField composables, DynamicFormScreen/ViewModel, DynamicItemDetailScreen/ViewModel, dynamic navigation, zero per-type branching |
 | M4D.1 | **Financial Vault Templates** (✅ Done) | 6 financial templates (Credit Card, Debit Card, Bank Account, PayPal, Wise, Stripe), 9 new FieldIds, 10 new FieldDefinitions, 6 CategoryIconIdentifiers, 102 tests |
+| M4D.2 | **Identity & Personal Templates** (✅ Done) | 8 identity templates (Passport, National ID, Driver License, Residence Permit, Health Insurance, Social Security, Tax ID, Student ID), 13 new FieldIds, 16 new FieldDefinitions, 8 CategoryIconIdentifiers, 102→142 tests |
 | M5 | **Security + Polish** (⏳ Pending) | Auto-clear clipboard, security audit, accessibility, crash reporting |
 
 ---
@@ -1092,3 +1093,75 @@ Existing categories shifted: SHOPPING→11, WORK→12, ENTERTAINMENT→13, GAMIN
 | `testDebugUnitTest` | ✅ 102 tests pass |
 | TODO/FIXME/HACK | Zero |
 | Deprecated APIs | Zero (Send icon uses AutoMirrored) |
+
+### Milestone 4D.2 — Identity & Personal Vault Templates (✅ Complete)
+
+**Goal:** Implement 8 identity and personal document templates using the existing Dynamic Vault Type Engine — no new screens, ViewModels, repositories, DAOs, navigation, or category-specific code.
+
+#### New FieldIds (13)
+
+`PASSPORT_TYPE`, `ISSUING_COUNTRY`, `NATIONALITY`, `RESIDENCE_PERMIT_NUMBER`, `RESIDENCE_PERMIT_TYPE`, `RESIDENCE_PERMIT_EXPIRY`, `LICENSE_CLASS`, `HEALTH_INSURANCE_ID`, `HEALTH_INSURANCE_PROVIDER`, `HEALTH_INSURANCE_GROUP_NUMBER`, `POLICY_NUMBER`, `STUDENT_ID_NUMBER`, `INSTITUTION_NAME`
+
+#### New FieldDefinitions (16)
+
+| Definition | FieldId | InputType | Validation |
+|------------|---------|-----------|------------|
+| `PassportType` | PASSPORT_TYPE | TEXT | Required |
+| `IssuingCountry` | ISSUING_COUNTRY | TEXT | Required |
+| `Nationality` | NATIONALITY | TEXT | Required |
+| `PassportExpiry` | PASSPORT_EXPIRY | DATE | YYYYMMDD format, required |
+| `LicenseClass` | LICENSE_CLASS | TEXT | Optional |
+| `ResidencePermitNumber` | RESIDENCE_PERMIT_NUMBER | TEXT | Required |
+| `ResidencePermitType` | RESIDENCE_PERMIT_TYPE | TEXT | Optional |
+| `ResidencePermitExpiry` | RESIDENCE_PERMIT_EXPIRY | DATE | YYYYMMDD format, required |
+| `SocialSecurityNumber` | SOCIAL_SECURITY_NUMBER | TEXT | 9 digits, required, XXX-XX-XXXX format |
+| `TaxId` | TAX_ID | TEXT | Required, alphanumeric, uppercased |
+| `StudentIdNumber` | STUDENT_ID_NUMBER | TEXT | Required |
+| `InstitutionName` | INSTITUTION_NAME | TEXT | Required |
+| `HealthInsuranceId` | HEALTH_INSURANCE_ID | TEXT | Optional |
+| `HealthInsuranceProvider` | HEALTH_INSURANCE_PROVIDER | TEXT | Required |
+| `HealthInsuranceGroupNumber` | HEALTH_INSURANCE_GROUP_NUMBER | TEXT | Optional |
+| `PolicyNumber` | POLICY_NUMBER | TEXT | Required |
+
+#### New Categories (8)
+
+| Category | Sort | Fields | Required |
+|----------|------|--------|----------|
+| PASSPORT | 19 | NAME, Full Name, Passport Number, Passport Type, Nationality, DOB, Expiry, Issuing Country, Notes | NAME, Full Name, Passport Number, Expiry |
+| NATIONAL_ID | 20 | NAME, Full Name, National ID Number, DOB, Nationality, Notes | NAME, Full Name, National ID Number |
+| DRIVER_LICENSE | 21 | NAME, Full Name, License Number, License Class, DOB, Expiry, Address, Notes | NAME, Full Name, License Number |
+| RESIDENCE_PERMIT | 22 | NAME, Full Name, Permit Number, Permit Type, Passport Number, Issuing Country, DOB, Nationality, Expiry, Notes | NAME, Full Name, Permit Number, Expiry |
+| HEALTH_INSURANCE | 23 | NAME, Full Name, Provider, Member ID, Group Number, Policy Number, Phone, Notes | NAME, Full Name, Provider, Policy Number |
+| SOCIAL_SECURITY | 24 | NAME, Full Name, SSN, Notes | NAME, Full Name, SSN |
+| TAX_ID | 25 | NAME, Full Name, Tax ID, Notes | NAME, Full Name, Tax ID |
+| STUDENT_ID | 26 | NAME, Full Name, Student ID Number, Institution, DOB, Notes | NAME, Full Name, Institution |
+
+#### New CategoryIcons (8)
+
+`PASSPORT` → `Icons.Default.Badge`, `NATIONAL_ID` → `Icons.Default.Badge`, `DRIVER_LICENSE` → `Icons.Default.Key`, `RESIDENCE_PERMIT` → `Icons.Default.Description`, `HEALTH_INSURANCE` → `Icons.Default.Favorite`, `SOCIAL_SECURITY` → `Icons.Default.Lock`, `TAX_ID` → `Icons.Default.Receipt`, `STUDENT_ID` → `Icons.Default.School`
+
+#### Sort Order
+
+New categories assigned sort orders 19–26.
+
+#### Modified Files
+
+| File | Changes |
+|------|---------|
+| `core/model/FieldId.kt` | Added 13 identity/personal identifiers (64→77 entries) |
+| `core/model/FieldDefinition.kt` | Added 16 definitions with validation/formatting, registered in `allDefinitions` (891→1089 lines) |
+| `core/model/VaultItemCategory.kt` | Added 8 categories, sort orders 19–26 (209→301 lines) |
+| `core/model/CategoryIconIdentifier.kt` | Added 8 icon identifiers (22→30 entries) |
+| `core/ui/components/CategoryIconDisplay.kt` | Added 8 icon mappings (66→82 lines) |
+| `test/.../FieldIdTest.kt` | Added 13 name stability asserts (61→74 lines) |
+| `test/.../FieldDefinitionTest.kt` | Added 16 test classes (434→682 lines) |
+
+#### Verification
+
+| Check | Result |
+|-------|--------|
+| `compileDebugKotlin` | ✅ Zero errors, zero warnings |
+| `assembleDebug` | ✅ |
+| `testDebugUnitTest` | ✅ 142 tests pass |
+| TODO/FIXME/HACK | Zero |
+| Deprecated APIs | Zero |

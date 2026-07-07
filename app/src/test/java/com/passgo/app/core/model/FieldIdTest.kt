@@ -41,6 +41,19 @@ class FieldIdTest {
         assertEquals("CUSTOMER_ID", FieldId.CUSTOMER_ID.name)
         assertEquals("BENEFICIARY", FieldId.BENEFICIARY.name)
         assertEquals("REFERENCE", FieldId.REFERENCE.name)
+        assertEquals("PASSPORT_TYPE", FieldId.PASSPORT_TYPE.name)
+        assertEquals("ISSUING_COUNTRY", FieldId.ISSUING_COUNTRY.name)
+        assertEquals("NATIONALITY", FieldId.NATIONALITY.name)
+        assertEquals("RESIDENCE_PERMIT_NUMBER", FieldId.RESIDENCE_PERMIT_NUMBER.name)
+        assertEquals("RESIDENCE_PERMIT_TYPE", FieldId.RESIDENCE_PERMIT_TYPE.name)
+        assertEquals("RESIDENCE_PERMIT_EXPIRY", FieldId.RESIDENCE_PERMIT_EXPIRY.name)
+        assertEquals("LICENSE_CLASS", FieldId.LICENSE_CLASS.name)
+        assertEquals("HEALTH_INSURANCE_ID", FieldId.HEALTH_INSURANCE_ID.name)
+        assertEquals("HEALTH_INSURANCE_PROVIDER", FieldId.HEALTH_INSURANCE_PROVIDER.name)
+        assertEquals("HEALTH_INSURANCE_GROUP_NUMBER", FieldId.HEALTH_INSURANCE_GROUP_NUMBER.name)
+        assertEquals("POLICY_NUMBER", FieldId.POLICY_NUMBER.name)
+        assertEquals("STUDENT_ID_NUMBER", FieldId.STUDENT_ID_NUMBER.name)
+        assertEquals("INSTITUTION_NAME", FieldId.INSTITUTION_NAME.name)
     }
 
     @Test

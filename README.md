@@ -2,7 +2,7 @@
 
 A professional Android password manager with encrypted local storage.
 
-> **Status:** Milestone 4D.1 — Financial Vault Templates (Complete)
+> **Status:** Milestone 4D.2 — Identity & Personal Vault Templates (Complete)
 > **Target:** Android 16 (API 36), APK distribution
 
 ## Architecture
@@ -37,7 +37,7 @@ Feature-first, single-module Android app built with:
 | Password generation (crypto-strong) | ✅ |
 | Password strength indicator | ✅ |
 | Item detail with copy, show/hide, open URL | ✅ |
-| 12 item categories (Google, Email, Banking, etc.) | ✅ |
+| 26 item categories (Google, Email, Banking, Identity, etc.) | ✅ |
 | Android Autofill Framework service | ✅ |
 | Credential matching by domain / package | ✅ |
 | Save request handling (new + update existing) | ✅ |
@@ -96,5 +96,6 @@ Feature-first, single-module Android app built with:
 | M4B | Architecture Refinements (FieldId, FieldDefinition, custom_fields, unified search) | ✅ Complete |
 | M4C | Dynamic Vault Type Engine (auto-generated screens, metadata-driven) | ✅ Complete |
 | M4D.1 | Financial Vault Templates (Credit Card, Debit Card, Bank Account, PayPal, Wise, Stripe) | ✅ Complete |
+| M4D.2 | Identity & Personal Vault Templates (Passport, National ID, Driver License, Residence Permit, Health Insurance, Social Security, Tax ID, Student ID) | ✅ Complete |
 | M4D | Advanced Search & Attachments (full-text, files, preview) | ⏳ Pending |
 | M5 | Security + Polish (clipboard, audit, accessibility) | ⏳ Pending |

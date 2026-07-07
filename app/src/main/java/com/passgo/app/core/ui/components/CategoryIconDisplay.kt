@@ -19,6 +19,9 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +50,14 @@ fun CategoryIconIdentifier.toImageVector(): ImageVector = when (this) {
     CategoryIconIdentifier.PAYPAL -> Icons.Default.Payment
     CategoryIconIdentifier.WISE -> Icons.AutoMirrored.Filled.Send
     CategoryIconIdentifier.STRIPE -> Icons.Default.Lock
+    CategoryIconIdentifier.PASSPORT -> Icons.Default.Badge
+    CategoryIconIdentifier.NATIONAL_ID -> Icons.Default.Badge
+    CategoryIconIdentifier.DRIVER_LICENSE -> Icons.Default.Key
+    CategoryIconIdentifier.RESIDENCE_PERMIT -> Icons.Default.Description
+    CategoryIconIdentifier.HEALTH_INSURANCE -> Icons.Default.Favorite
+    CategoryIconIdentifier.SOCIAL_SECURITY -> Icons.Default.Lock
+    CategoryIconIdentifier.TAX_ID -> Icons.Default.Receipt
+    CategoryIconIdentifier.STUDENT_ID -> Icons.Default.School
     CategoryIconIdentifier.OTHER -> Icons.Outlined.Folder
 }
 

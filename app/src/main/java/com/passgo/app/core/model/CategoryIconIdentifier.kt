@@ -18,5 +18,13 @@ enum class CategoryIconIdentifier {
     PAYPAL,
     WISE,
     STRIPE,
+    PASSPORT,
+    NATIONAL_ID,
+    DRIVER_LICENSE,
+    RESIDENCE_PERMIT,
+    HEALTH_INSURANCE,
+    SOCIAL_SECURITY,
+    TAX_ID,
+    STUDENT_ID,
     OTHER
 }

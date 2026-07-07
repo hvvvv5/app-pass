@@ -195,6 +195,92 @@ enum class VaultItemCategory(
         fields = listOf(FieldId.NAME, FieldId.NOTES),
         requiredFields = listOf(FieldId.NAME)
     ),
+    PASSPORT(
+        displayName = "Passport",
+        description = "Passport information and travel document details",
+        icon = CategoryIconIdentifier.PASSPORT,
+        colorArgb = 0xFF1A237E,
+        sortOrder = 19,
+        groups = listOf(FieldGroup.GENERAL, FieldGroup.PERSONAL_INFO, FieldGroup.IDENTITY, FieldGroup.NOTES),
+        fields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.PASSPORT_NUMBER, FieldId.PASSPORT_TYPE, FieldId.NATIONALITY, FieldId.DATE_OF_BIRTH, FieldId.PASSPORT_EXPIRY, FieldId.ISSUING_COUNTRY, FieldId.NOTES),
+        requiredFields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.PASSPORT_NUMBER, FieldId.PASSPORT_EXPIRY),
+        recommendedFields = listOf(FieldId.PASSPORT_TYPE, FieldId.NATIONALITY, FieldId.DATE_OF_BIRTH, FieldId.ISSUING_COUNTRY)
+    ),
+    NATIONAL_ID(
+        displayName = "National ID",
+        description = "National identification card details",
+        icon = CategoryIconIdentifier.NATIONAL_ID,
+        colorArgb = 0xFF4A148C,
+        sortOrder = 20,
+        groups = listOf(FieldGroup.GENERAL, FieldGroup.PERSONAL_INFO, FieldGroup.IDENTITY, FieldGroup.NOTES),
+        fields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.NATIONAL_ID_NUMBER, FieldId.DATE_OF_BIRTH, FieldId.NATIONALITY, FieldId.NOTES),
+        requiredFields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.NATIONAL_ID_NUMBER),
+        recommendedFields = listOf(FieldId.DATE_OF_BIRTH, FieldId.NATIONALITY)
+    ),
+    DRIVER_LICENSE(
+        displayName = "Driver License",
+        description = "Driver license information and details",
+        icon = CategoryIconIdentifier.DRIVER_LICENSE,
+        colorArgb = 0xFFE65100,
+        sortOrder = 21,
+        groups = listOf(FieldGroup.GENERAL, FieldGroup.PERSONAL_INFO, FieldGroup.IDENTITY, FieldGroup.ADDRESS, FieldGroup.NOTES),
+        fields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.DRIVER_LICENSE_NUMBER, FieldId.LICENSE_CLASS, FieldId.DATE_OF_BIRTH, FieldId.LICENSE_EXPIRY_DATE, FieldId.ADDRESS_LINE_1, FieldId.ADDRESS_LINE_2, FieldId.CITY, FieldId.POSTAL_CODE, FieldId.COUNTRY, FieldId.NOTES),
+        requiredFields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.DRIVER_LICENSE_NUMBER),
+        recommendedFields = listOf(FieldId.LICENSE_CLASS, FieldId.DATE_OF_BIRTH, FieldId.LICENSE_EXPIRY_DATE)
+    ),
+    RESIDENCE_PERMIT(
+        displayName = "Residence Permit",
+        description = "Residence permit and immigration document details",
+        icon = CategoryIconIdentifier.RESIDENCE_PERMIT,
+        colorArgb = 0xFF00695C,
+        sortOrder = 22,
+        groups = listOf(FieldGroup.GENERAL, FieldGroup.PERSONAL_INFO, FieldGroup.IDENTITY, FieldGroup.NOTES),
+        fields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.RESIDENCE_PERMIT_NUMBER, FieldId.RESIDENCE_PERMIT_TYPE, FieldId.PASSPORT_NUMBER, FieldId.ISSUING_COUNTRY, FieldId.DATE_OF_BIRTH, FieldId.NATIONALITY, FieldId.RESIDENCE_PERMIT_EXPIRY, FieldId.NOTES),
+        requiredFields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.RESIDENCE_PERMIT_NUMBER, FieldId.RESIDENCE_PERMIT_EXPIRY),
+        recommendedFields = listOf(FieldId.RESIDENCE_PERMIT_TYPE, FieldId.PASSPORT_NUMBER, FieldId.ISSUING_COUNTRY, FieldId.NATIONALITY)
+    ),
+    HEALTH_INSURANCE(
+        displayName = "Health Insurance",
+        description = "Health insurance card and policy details",
+        icon = CategoryIconIdentifier.HEALTH_INSURANCE,
+        colorArgb = 0xFF1B5E20,
+        sortOrder = 23,
+        groups = listOf(FieldGroup.GENERAL, FieldGroup.PERSONAL_INFO, FieldGroup.IDENTITY, FieldGroup.CONTACT, FieldGroup.NOTES),
+        fields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.HEALTH_INSURANCE_PROVIDER, FieldId.HEALTH_INSURANCE_ID, FieldId.HEALTH_INSURANCE_GROUP_NUMBER, FieldId.POLICY_NUMBER, FieldId.PHONE_NUMBER, FieldId.NOTES),
+        requiredFields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.HEALTH_INSURANCE_PROVIDER, FieldId.POLICY_NUMBER),
+        recommendedFields = listOf(FieldId.HEALTH_INSURANCE_ID, FieldId.HEALTH_INSURANCE_GROUP_NUMBER, FieldId.PHONE_NUMBER)
+    ),
+    SOCIAL_SECURITY(
+        displayName = "Social Security",
+        description = "Social security number and related information",
+        icon = CategoryIconIdentifier.SOCIAL_SECURITY,
+        colorArgb = 0xFF37474F,
+        sortOrder = 24,
+        groups = listOf(FieldGroup.GENERAL, FieldGroup.PERSONAL_INFO, FieldGroup.IDENTITY, FieldGroup.NOTES),
+        fields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.SOCIAL_SECURITY_NUMBER, FieldId.NOTES),
+        requiredFields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.SOCIAL_SECURITY_NUMBER)
+    ),
+    TAX_ID(
+        displayName = "Tax ID",
+        description = "Tax identification number information",
+        icon = CategoryIconIdentifier.TAX_ID,
+        colorArgb = 0xFF4E342E,
+        sortOrder = 25,
+        groups = listOf(FieldGroup.GENERAL, FieldGroup.PERSONAL_INFO, FieldGroup.IDENTITY, FieldGroup.NOTES),
+        fields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.TAX_ID, FieldId.NOTES),
+        requiredFields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.TAX_ID)
+    ),
+    STUDENT_ID(
+        displayName = "Student ID",
+        description = "Student identification card details",
+        icon = CategoryIconIdentifier.STUDENT_ID,
+        colorArgb = 0xFF0277BD,
+        sortOrder = 26,
+        groups = listOf(FieldGroup.GENERAL, FieldGroup.PERSONAL_INFO, FieldGroup.IDENTITY, FieldGroup.NOTES),
+        fields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.STUDENT_ID_NUMBER, FieldId.INSTITUTION_NAME, FieldId.DATE_OF_BIRTH, FieldId.NOTES),
+        requiredFields = listOf(FieldId.NAME, FieldId.FULL_NAME, FieldId.INSTITUTION_NAME),
+        recommendedFields = listOf(FieldId.STUDENT_ID_NUMBER, FieldId.DATE_OF_BIRTH)
+    ),
     OTHER(
         displayName = "Other",
         description = "General purpose vault item",

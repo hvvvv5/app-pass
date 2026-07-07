@@ -363,6 +363,281 @@ sealed class FieldDefinition(
         }
     }
 
+    data object PassportType : FieldDefinition(
+        fieldId = FieldId.PASSPORT_TYPE,
+        label = "Passport Type",
+        iconLabel = "Type",
+        inputType = FieldInputType.TEXT,
+        maxLength = 50,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Passport type is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object IssuingCountry : FieldDefinition(
+        fieldId = FieldId.ISSUING_COUNTRY,
+        label = "Issuing Country",
+        iconLabel = "Country",
+        inputType = FieldInputType.TEXT,
+        maxLength = 128,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Issuing country is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object Nationality : FieldDefinition(
+        fieldId = FieldId.NATIONALITY,
+        label = "Nationality",
+        iconLabel = "Nationality",
+        inputType = FieldInputType.TEXT,
+        maxLength = 128,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Nationality is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object PassportExpiry : FieldDefinition(
+        fieldId = FieldId.PASSPORT_EXPIRY,
+        label = "Passport Expiry",
+        iconLabel = "Expiry",
+        inputType = FieldInputType.DATE,
+        maxLength = 10,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            val cleaned = value.filter { it.isDigit() }
+            if (cleaned.length != 8)
+                return FieldValidationResult.Invalid("Date must be YYYYMMDD")
+            return FieldValidationResult.Valid
+        }
+
+        override fun format(value: String): String {
+            val cleaned = value.filter { it.isDigit() }
+            if (cleaned.length == 8) return "${cleaned.substring(0, 4)}-${cleaned.substring(4, 6)}-${cleaned.substring(6, 8)}"
+            return cleaned
+        }
+
+        override fun parse(raw: String): String = raw.filter { it.isDigit() }.let {
+            when {
+                it.length == 8 -> it
+                it.startsWith("19") || it.startsWith("20") -> it.take(8)
+                else -> it
+            }
+        }
+    }
+
+    data object LicenseClass : FieldDefinition(
+        fieldId = FieldId.LICENSE_CLASS,
+        label = "License Class",
+        iconLabel = "Class",
+        inputType = FieldInputType.TEXT,
+        maxLength = 20,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object ResidencePermitNumber : FieldDefinition(
+        fieldId = FieldId.RESIDENCE_PERMIT_NUMBER,
+        label = "Residence Permit Number",
+        iconLabel = "Permit",
+        inputType = FieldInputType.TEXT,
+        maxLength = 30,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Residence permit number is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object ResidencePermitType : FieldDefinition(
+        fieldId = FieldId.RESIDENCE_PERMIT_TYPE,
+        label = "Residence Permit Type",
+        iconLabel = "Type",
+        inputType = FieldInputType.TEXT,
+        maxLength = 50,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object ResidencePermitExpiry : FieldDefinition(
+        fieldId = FieldId.RESIDENCE_PERMIT_EXPIRY,
+        label = "Permit Expiry",
+        iconLabel = "Expiry",
+        inputType = FieldInputType.DATE,
+        maxLength = 10,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            val cleaned = value.filter { it.isDigit() }
+            if (cleaned.length != 8)
+                return FieldValidationResult.Invalid("Date must be YYYYMMDD")
+            return FieldValidationResult.Valid
+        }
+
+        override fun format(value: String): String {
+            val cleaned = value.filter { it.isDigit() }
+            if (cleaned.length == 8) return "${cleaned.substring(0, 4)}-${cleaned.substring(4, 6)}-${cleaned.substring(6, 8)}"
+            return cleaned
+        }
+
+        override fun parse(raw: String): String = raw.filter { it.isDigit() }.let {
+            when {
+                it.length == 8 -> it
+                it.startsWith("19") || it.startsWith("20") -> it.take(8)
+                else -> it
+            }
+        }
+    }
+
+    data object SocialSecurityNumber : FieldDefinition(
+        fieldId = FieldId.SOCIAL_SECURITY_NUMBER,
+        label = "Social Security Number",
+        iconLabel = "SSN",
+        inputType = FieldInputType.TEXT,
+        maxLength = 11,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            val cleaned = value.filter { it.isDigit() }
+            if (cleaned.length != 9)
+                return FieldValidationResult.Invalid("SSN must be 9 digits")
+            return FieldValidationResult.Valid
+        }
+
+        override fun format(value: String): String {
+            val cleaned = value.filter { it.isDigit() }
+            if (cleaned.length == 9) return "${cleaned.substring(0, 3)}-${cleaned.substring(3, 5)}-${cleaned.substring(5, 9)}"
+            return cleaned
+        }
+
+        override fun parse(raw: String): String = raw.filter { it.isDigit() }.let {
+            when {
+                it.length == 9 -> it
+                it.length > 9 -> it.take(9)
+                else -> it
+            }
+        }
+    }
+
+    data object TaxId : FieldDefinition(
+        fieldId = FieldId.TAX_ID,
+        label = "Tax ID",
+        iconLabel = "Tax ID",
+        inputType = FieldInputType.TEXT,
+        maxLength = 30,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            val cleaned = value.filter { it.isLetterOrDigit() }
+            if (cleaned.isBlank()) return FieldValidationResult.Invalid("Tax ID is required")
+            return FieldValidationResult.Valid
+        }
+
+        override fun format(value: String): String = value.filter { it.isLetterOrDigit() }.uppercase()
+        override fun parse(raw: String): String = raw.filter { it.isLetterOrDigit() }.uppercase()
+    }
+
+    data object StudentIdNumber : FieldDefinition(
+        fieldId = FieldId.STUDENT_ID_NUMBER,
+        label = "Student ID Number",
+        iconLabel = "Student ID",
+        inputType = FieldInputType.TEXT,
+        maxLength = 30,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Student ID is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object InstitutionName : FieldDefinition(
+        fieldId = FieldId.INSTITUTION_NAME,
+        label = "Institution Name",
+        iconLabel = "Institution",
+        inputType = FieldInputType.TEXT,
+        maxLength = 200,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Institution name is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    // ── Insurance ─────────────────────────────────────────────
+
+    data object HealthInsuranceId : FieldDefinition(
+        fieldId = FieldId.HEALTH_INSURANCE_ID,
+        label = "Member ID",
+        iconLabel = "Member",
+        inputType = FieldInputType.TEXT,
+        maxLength = 50,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Valid
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object HealthInsuranceProvider : FieldDefinition(
+        fieldId = FieldId.HEALTH_INSURANCE_PROVIDER,
+        label = "Insurance Provider",
+        iconLabel = "Provider",
+        inputType = FieldInputType.TEXT,
+        maxLength = 128,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Provider is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object HealthInsuranceGroupNumber : FieldDefinition(
+        fieldId = FieldId.HEALTH_INSURANCE_GROUP_NUMBER,
+        label = "Group Number",
+        iconLabel = "Group",
+        inputType = FieldInputType.TEXT,
+        maxLength = 50,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object PolicyNumber : FieldDefinition(
+        fieldId = FieldId.POLICY_NUMBER,
+        label = "Policy Number",
+        iconLabel = "Policy",
+        inputType = FieldInputType.TEXT,
+        maxLength = 50,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Policy number is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
     // ── API ──────────────────────────────────────────────────
 
     data object ApiKey : FieldDefinition(
@@ -869,6 +1144,10 @@ sealed class FieldDefinition(
             CreditCardNumber, CreditCardCvv, CreditCardExpiry, CreditCardHolderName, CreditCardPin,
             Iban, BankAccountNumber, BankRoutingNumber,
             PassportNumber, NationalIdNumber, DriverLicenseNumber, FullName, DateOfBirth,
+            PassportType, IssuingCountry, Nationality, PassportExpiry, LicenseClass,
+            ResidencePermitNumber, ResidencePermitType, ResidencePermitExpiry,
+            SocialSecurityNumber, TaxId, StudentIdNumber, InstitutionName,
+            HealthInsuranceId, HealthInsuranceProvider, HealthInsuranceGroupNumber, PolicyNumber,
             ApiKey, ApiSecret, MerchantId, CustomerId,
             WifiSsid, WifiPassword,
             LicenseKey,
