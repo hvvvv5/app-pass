@@ -1,10 +1,13 @@
 package com.passgo.app.data.mapper
 
 import com.passgo.app.core.database.entity.AttachmentEntity
+import com.passgo.app.core.database.entity.CustomFieldEntity
 import com.passgo.app.core.database.entity.FolderEntity
 import com.passgo.app.core.database.entity.TagEntity
 import com.passgo.app.core.database.entity.VaultEntity
 import com.passgo.app.core.database.entity.VaultItemEntity
+import com.passgo.app.core.model.CustomField
+import com.passgo.app.core.model.FieldId
 import com.passgo.app.core.model.Attachment
 import com.passgo.app.core.model.Folder
 import com.passgo.app.core.model.SyncStatus
@@ -153,4 +156,20 @@ fun Attachment.toEntity(): AttachmentEntity = AttachmentEntity(
     deletedAt = deletedAt,
     syncVersion = syncVersion,
     syncStatus = syncStatus.name
+)
+
+fun CustomFieldEntity.toDomain(): CustomField = CustomField(
+    id = id,
+    itemId = itemId,
+    fieldId = try { FieldId.valueOf(fieldId) } catch (_: IllegalArgumentException) { FieldId.CUSTOM_TEXT },
+    value = value,
+    sortOrder = sortOrder
+)
+
+fun CustomField.toEntity(): CustomFieldEntity = CustomFieldEntity(
+    id = id,
+    itemId = itemId,
+    fieldId = fieldId.name,
+    value = value,
+    sortOrder = sortOrder
 )

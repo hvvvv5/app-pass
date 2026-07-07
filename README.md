@@ -2,7 +2,7 @@
 
 A professional Android password manager with encrypted local storage.
 
-> **Status:** Milestone 4A — Vault Organization (Complete)
+> **Status:** Milestone 4B — Architecture Refinements (Complete)
 > **Target:** Android 16 (API 36), APK distribution
 
 ## Architecture
@@ -52,6 +52,8 @@ Feature-first, single-module Android app built with:
 | Archive / restore items | ✅ |
 | Trash (soft delete, restore, permanent delete) | ✅ |
 | Folder management | ✅ |
+| Custom field architecture (FieldId, FieldDefinition, custom_fields table) | ✅ |
+| Unified search (VaultItem fields + custom field values) | ✅ |
 
 ## Screens
 
@@ -91,6 +93,6 @@ Feature-first, single-module Android app built with:
 | M3B | Autofill Engine | ✅ Complete |
 | M3C | Autofill Polish, Compatibility & Security | ✅ Complete |
 | M4A | Vault Organization (folders, tags, favorites, archive, trash, collections) | ✅ Complete |
-| M4B | Vault Item Types (secure notes, credit cards, identities) | ⏳ Pending |
+| M4B | Architecture Refinements (FieldId, FieldDefinition, custom_fields, unified search) | ✅ Complete |
 | M4C | Advanced Search & Attachments (full-text, files, preview) | ⏳ Pending |
 | M5 | Security + Polish (clipboard, audit, accessibility) | ⏳ Pending |

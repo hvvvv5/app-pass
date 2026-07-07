@@ -1,7 +1,7 @@
 # PROJECT_MAP — PassGo
 
-> **Last Updated:** 2026-07-06  
-> **Status:** Milestone 4A — Vault Organization (Complete)  
+> **Last Updated:** 2026-07-07  
+> **Status:** Milestone 4B — Architecture Refinements (Complete)  
 > **Target Platform:** Android 16 (API 36)
 
 ---
@@ -39,14 +39,14 @@ com.passgo.app/
  ├── PassGoApplication.kt   # @HiltAndroidApp entry point
  ├── MainActivity.kt         # Single Activity, Compose entry
  ├── core/
- │   ├── database/
- │   │   ├── dao/            # VaultDao, VaultItemDao, FolderDao, TagDao, AttachmentDao
- │   │   ├── entity/         # VaultEntity, VaultItemEntity, FolderEntity, TagEntity, TagItemCrossRef, AttachmentEntity
+│   ├── database/
+│   │   ├── dao/            # VaultDao, VaultItemDao, FolderDao, TagDao, AttachmentDao, CustomFieldDao
+│   │   ├── entity/         # VaultEntity, VaultItemEntity, FolderEntity, TagEntity, TagItemCrossRef, AttachmentEntity, CustomFieldEntity
  │   │   ├── DatabaseMigrations.kt
  │   │   └── PassGoDatabase.kt
  │   ├── error/              # AppResult, AppException sealed types
  │   ├── logging/            # PassGoLogger (async channel)
- │   ├── model/              # Domain models: Vault, VaultItem, Folder, Tag, Attachment, SyncStatus
+ │   ├── model/              # Domain models: Vault, VaultItem, Folder, Tag, Attachment, SyncStatus, CustomField, FieldId, FieldDefinition
  │   ├── navigation/         # PassGoNavHost + Screen sealed class + auth routing
  │   ├── security/           # KeyDerivation, KeyStoreManager, MasterKeyManager, PasswordHasher, PasswordValidator, MasterPasswordStore
  │   └── ui/theme/           # Material 3 theme (Color, Type, Theme) with ThemeMode support
@@ -134,8 +134,8 @@ App → MasterKeyManager.getOrCreateMasterKey() → KeyStoreManager (KeyStore AE
 | `core.logging` | Async channel-based logger | `PassGoLogger.kt`, `LogLevel.kt` |
 | `core.error` | Error handling types | `AppResult.kt` (Success / Error sealed class) |
 | `core.security` | Key derivation, storage, master key lifecycle, password hashing/validation | `KeyDerivation.kt`, `KeyStoreManager.kt`, `MasterKeyManager.kt`, `PasswordHasher.kt`, `PasswordValidator.kt`, `MasterPasswordStore.kt` |
-| `core.model` | Domain models | `Vault.kt`, `VaultItem.kt`, `Folder.kt`, `Tag.kt`, `Attachment.kt`, `SyncStatus.kt` |
-| `core.database` | Room entities, DAOs, database class | `PassGoDatabase.kt`, `DatabaseMigrations.kt`, `dao/*`, `entity/*` |
+| `core.model` | Domain models | `Vault.kt`, `VaultItem.kt`, `Folder.kt`, `Tag.kt`, `Attachment.kt`, `SyncStatus.kt`, `CustomField.kt`, `FieldId.kt`, `FieldDefinition.kt` |
+| `core.database` | Room entities, DAOs, database class | `PassGoDatabase.kt`, `DatabaseMigrations.kt`, `dao/*` (6 DAOs), `entity/*` (7 entities) |
 | `data.mapper` | Entity-to-domain mapping | `Mappers.kt` |
 | `data.repository` | Repository interfaces + implementations | `VaultRepository.kt`, `VaultRepositoryImpl.kt`, etc. |
 | `data.session` | Session state, auto-lock timeout | `SessionManager.kt` |
@@ -163,6 +163,7 @@ App → MasterKeyManager.getOrCreateMasterKey() → KeyStoreManager (KeyStore AE
 | `tags` | id, vault_id, name, color, created_at, updated_at, deleted_at, sync_version, sync_status | vault_id→vaults |
 | `tag_item` | tag_id, item_id | tag_id→tags, item_id→vault_items |
 | `attachments` | id, item_id, name, mime_type, encrypted_file_uri, size_bytes, created_at, updated_at, deleted_at, sync_version, sync_status | item_id→vault_items |
+| `custom_fields` | id, item_id, field_id, field_value, sort_order | item_id→vault_items (CASCADE) |
 
 All tables support: UUID primary keys, soft delete (deleted_at), sync metadata (sync_version, sync_status).
 
@@ -265,7 +266,7 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 | M3B | **Autofill Engine** (✅ Done) | Vault integration, credential matching, dataset filling, save request handling, auth-aware responses |
 | M3C | **Autofill Polish, Compatibility & Security** (✅ Done) | Biometric auth, inline suggestions, UX polish, accessibility, compatibility, security hardening, error recovery |
 | M4A | **Vault Organization** (✅ Done) | Smart folders, tags, favorites, archive, trash, smart collections |
-| M4B | **Vault Item Types** (⏳ Pending) | Secure notes, credit cards, identities, custom fields |
+| M4B | **Architecture Refinements** (✅ Done) | FieldId enum, FieldDefinition sealed class, CustomField entity/DAO/repository, custom_fields table, unified search via LEFT JOIN, migration 3→4, unit tests |
 | M4C | **Advanced Search & Attachments** (⏳ Pending) | Full-text search, file attachments, preview |
 | M5 | **Security + Polish** (⏳ Pending) | Auto-clear clipboard, security audit, accessibility, crash reporting |
 
@@ -947,3 +948,35 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 | `feature/vault/AddEditItemScreen.kt` | 301 → 315 | Added tag chip selection UI |
 | `feature/vault/ItemDetailViewModel.kt` | 87 → 110 | Added archiveItem, moveItem, tags loading, folders |
 | `feature/vault/ItemDetailScreen.kt` | 259 → 360+ | Added tag display chips, overflow menu (archive, move, delete) |
+
+### Milestone 4B — New Files
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `core/model/FieldId.kt` | 50 | Enum with 47 stable custom field identifiers |
+| `core/model/FieldDefinition.kt` | 473 | Sealed class: 25 definitions with validate/format/parse/inputType/autofillHint, companion fromId() lookup |
+| `core/model/CustomField.kt` | 13 | Domain model (id, itemId, fieldId, value, sortOrder) with definition delegate + formattedValue |
+| `core/database/entity/CustomFieldEntity.kt` | 40 | Room entity for custom_fields table: FK→vault_items (CASCADE), unique(item_id, field_id) |
+| `core/database/dao/CustomFieldDao.kt` | 30 | DAO: getFieldsForItem (Flow), getFieldsForItems, insert/insertBatch, delete/deleteAllForItem |
+| `data/repository/CustomFieldRepository.kt` | 14 | Repository interface |
+| `data/repository/CustomFieldRepositoryImpl.kt` | 56 | Repository implementation with AppResult error handling |
+
+**Test files (5 new, 69 tests)**
+
+| File | Purpose |
+|------|---------|
+| `test/.../FieldDefinitionTest.kt` | Validation, format, parse for all field types (parameterized) |
+| `test/.../FieldIdTest.kt` | Enum name stability, FieldId→FieldDefinition mapping completeness |
+| `test/.../CustomFieldTest.kt` | Definition delegation, formattedValue delegation |
+| `test/.../CustomFieldMapperTest.kt` | Entity↔domain bidirectional mapping, unknown fieldId fallback |
+| `test/.../DatabaseMigrationTest.kt` | Migration version sequencing, MIGRATION_3_4 verification |
+
+### Milestone 4B — Modified Files
+
+| File | Changes |
+|------|---------|
+| `core/database/DatabaseMigrations.kt` | Added MIGRATION_3_4 (CREATE TABLE custom_fields + indices) |
+| `core/database/PassGoDatabase.kt` | Version 3→4, added CustomFieldEntity + CustomFieldDao |
+| `di/DatabaseModule.kt` | Added CustomFieldRepository @Binds + CustomFieldDao @Provides |
+| `data/mapper/Mappers.kt` | Added CustomFieldEntity↔CustomField mapping functions |
+| `core/database/dao/VaultItemDao.kt` | 4 search queries: LEFT JOIN custom_fields for unified search |

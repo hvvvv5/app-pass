@@ -36,34 +36,38 @@ interface VaultItemDao {
     fun getDeleted(vaultId: String): Flow<List<VaultItemEntity>>
 
     @Query("""
-        SELECT * FROM vault_items 
-        WHERE vault_id = :vaultId AND deleted_at IS NULL AND archived_at IS NULL 
-        AND (name LIKE '%' || :query || '%' OR username LIKE '%' || :query || '%' OR email LIKE '%' || :query || '%' OR url LIKE '%' || :query || '%' OR notes LIKE '%' || :query || '%')
-        ORDER BY updated_at DESC
+        SELECT DISTINCT vi.* FROM vault_items vi
+        LEFT JOIN custom_fields cf ON vi.id = cf.item_id
+        WHERE vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL 
+        AND (vi.name LIKE '%' || :query || '%' OR vi.username LIKE '%' || :query || '%' OR vi.email LIKE '%' || :query || '%' OR vi.url LIKE '%' || :query || '%' OR vi.notes LIKE '%' || :query || '%' OR cf.field_value LIKE '%' || :query || '%')
+        ORDER BY vi.updated_at DESC
     """)
     fun searchItems(vaultId: String, query: String): Flow<List<VaultItemEntity>>
 
     @Query("""
-        SELECT * FROM vault_items 
-        WHERE vault_id = :vaultId AND deleted_at IS NULL AND archived_at IS NULL AND type = :type
-        AND (name LIKE '%' || :query || '%' OR username LIKE '%' || :query || '%' OR email LIKE '%' || :query || '%' OR url LIKE '%' || :query || '%' OR notes LIKE '%' || :query || '%')
-        ORDER BY updated_at DESC
+        SELECT DISTINCT vi.* FROM vault_items vi
+        LEFT JOIN custom_fields cf ON vi.id = cf.item_id
+        WHERE vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL AND vi.type = :type
+        AND (vi.name LIKE '%' || :query || '%' OR vi.username LIKE '%' || :query || '%' OR vi.email LIKE '%' || :query || '%' OR vi.url LIKE '%' || :query || '%' OR vi.notes LIKE '%' || :query || '%' OR cf.field_value LIKE '%' || :query || '%')
+        ORDER BY vi.updated_at DESC
     """)
     fun searchByType(vaultId: String, type: String, query: String): Flow<List<VaultItemEntity>>
 
     @Query("""
-        SELECT * FROM vault_items 
-        WHERE vault_id = :vaultId AND deleted_at IS NULL AND archived_at IS NULL AND favorite = 1
-        AND (name LIKE '%' || :query || '%' OR username LIKE '%' || :query || '%' OR email LIKE '%' || :query || '%' OR url LIKE '%' || :query || '%' OR notes LIKE '%' || :query || '%')
-        ORDER BY updated_at DESC
+        SELECT DISTINCT vi.* FROM vault_items vi
+        LEFT JOIN custom_fields cf ON vi.id = cf.item_id
+        WHERE vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL AND vi.favorite = 1
+        AND (vi.name LIKE '%' || :query || '%' OR vi.username LIKE '%' || :query || '%' OR vi.email LIKE '%' || :query || '%' OR vi.url LIKE '%' || :query || '%' OR vi.notes LIKE '%' || :query || '%' OR cf.field_value LIKE '%' || :query || '%')
+        ORDER BY vi.updated_at DESC
     """)
     fun searchFavorites(vaultId: String, query: String): Flow<List<VaultItemEntity>>
 
     @Query("""
-        SELECT * FROM vault_items 
-        WHERE vault_id = :vaultId AND deleted_at IS NULL AND archived_at IS NULL AND folder_id = :folderId
-        AND (name LIKE '%' || :query || '%' OR username LIKE '%' || :query || '%' OR email LIKE '%' || :query || '%' OR url LIKE '%' || :query || '%' OR notes LIKE '%' || :query || '%')
-        ORDER BY updated_at DESC
+        SELECT DISTINCT vi.* FROM vault_items vi
+        LEFT JOIN custom_fields cf ON vi.id = cf.item_id
+        WHERE vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL AND vi.folder_id = :folderId
+        AND (vi.name LIKE '%' || :query || '%' OR vi.username LIKE '%' || :query || '%' OR vi.email LIKE '%' || :query || '%' OR vi.url LIKE '%' || :query || '%' OR vi.notes LIKE '%' || :query || '%' OR cf.field_value LIKE '%' || :query || '%')
+        ORDER BY vi.updated_at DESC
     """)
     fun searchByFolder(vaultId: String, folderId: String, query: String): Flow<List<VaultItemEntity>>
 

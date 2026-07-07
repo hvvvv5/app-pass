@@ -3,6 +3,7 @@ package com.passgo.app.di
 import android.content.Context
 import com.passgo.app.core.database.PassGoDatabase
 import com.passgo.app.core.database.dao.AttachmentDao
+import com.passgo.app.core.database.dao.CustomFieldDao
 import com.passgo.app.core.database.dao.FolderDao
 import com.passgo.app.core.database.dao.TagDao
 import com.passgo.app.core.database.dao.VaultDao
@@ -10,6 +11,8 @@ import com.passgo.app.core.database.dao.VaultItemDao
 import com.passgo.app.core.security.MasterKeyManager
 import com.passgo.app.data.repository.AttachmentRepository
 import com.passgo.app.data.repository.AttachmentRepositoryImpl
+import com.passgo.app.data.repository.CustomFieldRepository
+import com.passgo.app.data.repository.CustomFieldRepositoryImpl
 import com.passgo.app.data.repository.FolderRepository
 import com.passgo.app.data.repository.FolderRepositoryImpl
 import com.passgo.app.data.repository.TagRepository
@@ -50,6 +53,10 @@ abstract class DatabaseModule {
     @Singleton
     abstract fun bindAttachmentRepository(impl: AttachmentRepositoryImpl): AttachmentRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindCustomFieldRepository(impl: CustomFieldRepositoryImpl): CustomFieldRepository
+
     companion object {
         @Provides
         @Singleton
@@ -75,5 +82,8 @@ abstract class DatabaseModule {
 
         @Provides
         fun provideAttachmentDao(database: PassGoDatabase): AttachmentDao = database.attachmentDao()
+
+        @Provides
+        fun provideCustomFieldDao(database: PassGoDatabase): CustomFieldDao = database.customFieldDao()
     }
 }

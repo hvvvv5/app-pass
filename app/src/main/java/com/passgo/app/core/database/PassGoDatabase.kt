@@ -7,11 +7,13 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.passgo.app.core.database.dao.AttachmentDao
+import com.passgo.app.core.database.dao.CustomFieldDao
 import com.passgo.app.core.database.dao.FolderDao
 import com.passgo.app.core.database.dao.TagDao
 import com.passgo.app.core.database.dao.VaultDao
 import com.passgo.app.core.database.dao.VaultItemDao
 import com.passgo.app.core.database.entity.AttachmentEntity
+import com.passgo.app.core.database.entity.CustomFieldEntity
 import com.passgo.app.core.database.entity.FolderEntity
 import com.passgo.app.core.database.entity.TagEntity
 import com.passgo.app.core.database.entity.TagItemCrossRef
@@ -26,9 +28,10 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         FolderEntity::class,
         TagEntity::class,
         TagItemCrossRef::class,
-        AttachmentEntity::class
+        AttachmentEntity::class,
+        CustomFieldEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 abstract class PassGoDatabase : RoomDatabase() {
@@ -38,6 +41,7 @@ abstract class PassGoDatabase : RoomDatabase() {
     abstract fun folderDao(): FolderDao
     abstract fun tagDao(): TagDao
     abstract fun attachmentDao(): AttachmentDao
+    abstract fun customFieldDao(): CustomFieldDao
 
     companion object {
         private const val DB_NAME = "passgo_vault.db"
