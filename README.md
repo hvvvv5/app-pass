@@ -2,7 +2,7 @@
 
 A professional Android password manager with encrypted local storage.
 
-> **Status:** Milestone 4D.2 — Identity & Personal Vault Templates (Complete)
+> **Status:** Milestone 4D.3 — Developer & Infrastructure Vault Templates (Complete)
 > **Target:** Android 16 (API 36), APK distribution
 
 ## Architecture
@@ -37,7 +37,7 @@ Feature-first, single-module Android app built with:
 | Password generation (crypto-strong) | ✅ |
 | Password strength indicator | ✅ |
 | Item detail with copy, show/hide, open URL | ✅ |
-| 26 item categories (Google, Email, Banking, Identity, etc.) | ✅ |
+| 34 item categories (Google, Email, Banking, Identity, Developer, Infrastructure, etc.) | ✅ |
 | Android Autofill Framework service | ✅ |
 | Credential matching by domain / package | ✅ |
 | Save request handling (new + update existing) | ✅ |
@@ -54,6 +54,15 @@ Feature-first, single-module Android app built with:
 | Folder management | ✅ |
 | Custom field architecture (FieldId, FieldDefinition, custom_fields table) | ✅ |
 | Unified search (VaultItem fields + custom field values) | ✅ |
+| Dynamic Vault Type Engine | ✅ |
+| Metadata-driven dynamic forms | ✅ |
+| Metadata-driven item details | ✅ |
+| Financial Vault Templates | ✅ |
+| Identity & Personal Vault Templates | ✅ |
+| Developer & Infrastructure Vault Templates | ✅ |
+| Reusable FieldDefinition validation engine | ✅ |
+| Dynamic category rendering | ✅ |
+| Generic custom field architecture | ✅ |
 
 ## Screens
 
@@ -63,9 +72,9 @@ Feature-first, single-module Android app built with:
 | Unlock | `/unlock` | Password verification (subsequent launches) |
 | Home | `/home` | Dashboard with stats, security status, tip |
 | Vault | `/vault` | Item list with search, sort, filter, categories |
-| Add Item | `/vault/add` | Add new password item form |
-| Item Detail | `/vault/detail/{id}` | View/copy/show/open item details |
-| Edit Item | `/vault/edit/{id}` | Edit existing item |
+| Add Item | `/vault/add` | Dynamic metadata-driven form |
+| Item Detail | `/vault/detail/{id}` | Dynamic metadata-driven detail screen |
+| Edit Item | `/vault/edit/{id}` | Dynamic metadata-driven editor |
 | Premium | `/premium` | Upgrade features |
 | Settings | `/settings` | Theme, auto-lock, app info |
 
@@ -97,5 +106,6 @@ Feature-first, single-module Android app built with:
 | M4C | Dynamic Vault Type Engine (auto-generated screens, metadata-driven) | ✅ Complete |
 | M4D.1 | Financial Vault Templates (Credit Card, Debit Card, Bank Account, PayPal, Wise, Stripe) | ✅ Complete |
 | M4D.2 | Identity & Personal Vault Templates (Passport, National ID, Driver License, Residence Permit, Health Insurance, Social Security, Tax ID, Student ID) | ✅ Complete |
+| M4D.3 | Developer & Infrastructure Vault Templates (GitHub, GitLab, Docker Hub, AWS, Azure, GCP, SSH Key, Database) | ✅ Complete |
 | M4D | Advanced Search & Attachments (full-text, files, preview) | ⏳ Pending |
 | M5 | Security + Polish (clipboard, audit, accessibility) | ⏳ Pending |
