@@ -23,6 +23,75 @@ sealed class FieldDefinition(
 
     open fun parse(raw: String): String = raw.trim()
 
+    // ── Standard Vault Item Fields ──────────────────────────
+
+    data object ItemName : FieldDefinition(
+        fieldId = FieldId.NAME,
+        label = "Name",
+        iconLabel = "Name",
+        inputType = FieldInputType.TEXT,
+        maxLength = 200,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Name is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object ItemUsername : FieldDefinition(
+        fieldId = FieldId.USERNAME,
+        label = "Username",
+        iconLabel = "Username",
+        inputType = FieldInputType.TEXT,
+        maxLength = 200,
+        autofillHint = "username"
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object ItemPassword : FieldDefinition(
+        fieldId = FieldId.PASSWORD,
+        label = "Password",
+        iconLabel = "Password",
+        inputType = FieldInputType.PASSWORD,
+        maxLength = 512,
+        autofillHint = "password"
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Password is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object ItemUrl : FieldDefinition(
+        fieldId = FieldId.URL,
+        label = "Website",
+        iconLabel = "URL",
+        inputType = FieldInputType.URL,
+        maxLength = 2048,
+        autofillHint = "url"
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object ItemNotes : FieldDefinition(
+        fieldId = FieldId.NOTES,
+        label = "Notes",
+        iconLabel = "Notes",
+        inputType = FieldInputType.TEXT,
+        maxLength = 8192,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
+    }
+
     // ── Credit Card ──────────────────────────────────────────
 
     data object CreditCardNumber : FieldDefinition(
@@ -354,6 +423,203 @@ sealed class FieldDefinition(
         }
     }
 
+    // ── Address ─────────────────────────────────────────────
+
+    data object AddressLine1 : FieldDefinition(
+        fieldId = FieldId.ADDRESS_LINE_1,
+        label = "Address Line 1",
+        iconLabel = "Address",
+        inputType = FieldInputType.TEXT,
+        maxLength = 256,
+        autofillHint = "addressLine1"
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Address is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object AddressLine2 : FieldDefinition(
+        fieldId = FieldId.ADDRESS_LINE_2,
+        label = "Address Line 2",
+        iconLabel = "Address",
+        inputType = FieldInputType.TEXT,
+        maxLength = 256,
+        autofillHint = "addressLine2"
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object City : FieldDefinition(
+        fieldId = FieldId.CITY,
+        label = "City",
+        iconLabel = "City",
+        inputType = FieldInputType.TEXT,
+        maxLength = 128,
+        autofillHint = "addressCity"
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("City is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object PostalCode : FieldDefinition(
+        fieldId = FieldId.POSTAL_CODE,
+        label = "Postal Code",
+        iconLabel = "Postal",
+        inputType = FieldInputType.TEXT,
+        maxLength = 20,
+        autofillHint = "postalCode"
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Postal code is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object Country : FieldDefinition(
+        fieldId = FieldId.COUNTRY,
+        label = "Country",
+        iconLabel = "Country",
+        inputType = FieldInputType.TEXT,
+        maxLength = 128,
+        autofillHint = "countryName"
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Country is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object PhoneNumber : FieldDefinition(
+        fieldId = FieldId.PHONE_NUMBER,
+        label = "Phone Number",
+        iconLabel = "Phone",
+        inputType = FieldInputType.PHONE,
+        maxLength = 30,
+        autofillHint = "phone"
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
+    }
+
+    // ── Bank Details ─────────────────────────────────────────
+
+    data object SwiftBic : FieldDefinition(
+        fieldId = FieldId.SWIFT_BIC,
+        label = "SWIFT/BIC",
+        iconLabel = "SWIFT",
+        inputType = FieldInputType.TEXT,
+        maxLength = 11,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("SWIFT/BIC is required")
+            if (value.length < 8 || value.length > 11)
+                return FieldValidationResult.Invalid("SWIFT/BIC must be 8-11 characters")
+            return FieldValidationResult.Valid
+        }
+
+        override fun format(value: String): String = value.uppercase()
+        override fun parse(raw: String): String = raw.uppercase()
+    }
+
+    // ── License Details ──────────────────────────────────────
+
+    data object LicenseType : FieldDefinition(
+        fieldId = FieldId.LICENSE_TYPE,
+        label = "License Type",
+        iconLabel = "Type",
+        inputType = FieldInputType.TEXT,
+        maxLength = 100,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object LicenseRegisteredEmail : FieldDefinition(
+        fieldId = FieldId.LICENSE_REGISTERED_EMAIL,
+        label = "Registered Email",
+        iconLabel = "Email",
+        inputType = FieldInputType.EMAIL,
+        maxLength = 256,
+        autofillHint = "email"
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isNotBlank() && !value.contains("@"))
+                return FieldValidationResult.Invalid("Must be a valid email")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object LicensePurchaseDate : FieldDefinition(
+        fieldId = FieldId.LICENSE_PURCHASE_DATE,
+        label = "Purchase Date",
+        iconLabel = "Date",
+        inputType = FieldInputType.DATE,
+        maxLength = 10,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Valid
+            val cleaned = value.filter { it.isDigit() }
+            if (cleaned.length != 8)
+                return FieldValidationResult.Invalid("Date must be YYYYMMDD")
+            return FieldValidationResult.Valid
+        }
+
+        override fun format(value: String): String {
+            val cleaned = value.filter { it.isDigit() }
+            if (cleaned.length == 8) return "${cleaned.substring(0, 4)}-${cleaned.substring(4, 6)}-${cleaned.substring(6, 8)}"
+            return cleaned
+        }
+
+        override fun parse(raw: String): String = raw.filter { it.isDigit() }.let {
+            when {
+                it.length == 8 -> it
+                it.startsWith("19") || it.startsWith("20") -> it.take(8)
+                else -> it
+            }
+        }
+    }
+
+    data object LicenseExpiryDate : FieldDefinition(
+        fieldId = FieldId.LICENSE_EXPIRY_DATE,
+        label = "Expiry Date",
+        iconLabel = "Expiry",
+        inputType = FieldInputType.DATE,
+        maxLength = 10,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Valid
+            val cleaned = value.filter { it.isDigit() }
+            if (cleaned.length != 8)
+                return FieldValidationResult.Invalid("Date must be YYYYMMDD")
+            return FieldValidationResult.Valid
+        }
+
+        override fun format(value: String): String {
+            val cleaned = value.filter { it.isDigit() }
+            if (cleaned.length == 8) return "${cleaned.substring(0, 4)}-${cleaned.substring(4, 6)}-${cleaned.substring(6, 8)}"
+            return cleaned
+        }
+
+        override fun parse(raw: String): String = raw.filter { it.isDigit() }.let {
+            when {
+                it.length == 8 -> it
+                it.startsWith("19") || it.startsWith("20") -> it.take(8)
+                else -> it
+            }
+        }
+    }
+
     // ── Server ───────────────────────────────────────────────
 
     data object ServerHostname : FieldDefinition(
@@ -451,12 +717,16 @@ sealed class FieldDefinition(
     companion object {
         private val allDefinitions: Map<FieldId, FieldDefinition> by lazy {
             listOf(
+            ItemName, ItemUsername, ItemPassword, ItemUrl, ItemNotes,
             CreditCardNumber, CreditCardCvv, CreditCardExpiry, CreditCardHolderName,
             Iban, BankAccountNumber, BankRoutingNumber,
             PassportNumber, NationalIdNumber, DriverLicenseNumber, FullName, DateOfBirth,
             ApiKey, ApiSecret,
             WifiSsid, WifiPassword,
             LicenseKey,
+            LicenseType, LicenseRegisteredEmail, LicensePurchaseDate, LicenseExpiryDate,
+            AddressLine1, AddressLine2, City, PostalCode, Country,
+            PhoneNumber, SwiftBic,
             ServerHostname, ServerPort,
             CustomLabel(FieldId.CUSTOM_LABEL),
             CustomText(FieldId.CUSTOM_TEXT),

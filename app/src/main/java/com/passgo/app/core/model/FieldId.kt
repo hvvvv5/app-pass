@@ -1,6 +1,11 @@
 package com.passgo.app.core.model
 
 enum class FieldId {
+    NAME,
+    USERNAME,
+    PASSWORD,
+    URL,
+    NOTES,
     CREDIT_CARD_NUMBER,
     CREDIT_CARD_CVV,
     CREDIT_CARD_EXPIRY,

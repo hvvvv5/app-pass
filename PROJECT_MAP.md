@@ -1,7 +1,7 @@
 # PROJECT_MAP — PassGo
 
 > **Last Updated:** 2026-07-07  
-> **Status:** Milestone 4B — Architecture Refinements (Complete)  
+> **Status:** Milestone 4C — Dynamic Vault Type Engine (Complete)  
 > **Target Platform:** Android 16 (API 36)
 
 ---
@@ -58,7 +58,7 @@ com.passgo.app/
  ├── di/                     # AppModule, DatabaseModule
  └── feature/
      ├── home/               # HomeScreen (dashboard with stats, security status, tip card)
-     ├── vault/              # VaultScreen (items list with CRUD), Add/Edit, ItemDetail
+      ├── vault/              # VaultScreen (items list with CRUD), DynamicForm, DynamicItemDetail
       ├── autofill/            # PassGoAutofillService + session/parser/matcher/dataset/domain/repository
       │   ├── service/        # PassGoAutofillService (@AndroidEntryPoint)
       │   ├── session/        # AutofillSession lifecycle manager
@@ -134,14 +134,14 @@ App → MasterKeyManager.getOrCreateMasterKey() → KeyStoreManager (KeyStore AE
 | `core.logging` | Async channel-based logger | `PassGoLogger.kt`, `LogLevel.kt` |
 | `core.error` | Error handling types | `AppResult.kt` (Success / Error sealed class) |
 | `core.security` | Key derivation, storage, master key lifecycle, password hashing/validation | `KeyDerivation.kt`, `KeyStoreManager.kt`, `MasterKeyManager.kt`, `PasswordHasher.kt`, `PasswordValidator.kt`, `MasterPasswordStore.kt` |
-| `core.model` | Domain models | `Vault.kt`, `VaultItem.kt`, `Folder.kt`, `Tag.kt`, `Attachment.kt`, `SyncStatus.kt`, `CustomField.kt`, `FieldId.kt`, `FieldDefinition.kt` |
+| `core.model` | Domain models | `Vault.kt`, `VaultItem.kt`, `Folder.kt`, `Tag.kt`, `Attachment.kt`, `SyncStatus.kt`, `CustomField.kt`, `FieldId.kt`, `FieldDefinition.kt`, `FieldGroup.kt`, `CategoryIconIdentifier.kt` |
 | `core.database` | Room entities, DAOs, database class | `PassGoDatabase.kt`, `DatabaseMigrations.kt`, `dao/*` (6 DAOs), `entity/*` (7 entities) |
 | `data.mapper` | Entity-to-domain mapping | `Mappers.kt` |
 | `data.repository` | Repository interfaces + implementations | `VaultRepository.kt`, `VaultRepositoryImpl.kt`, etc. |
 | `data.session` | Session state, auto-lock timeout | `SessionManager.kt` |
 | `data.settings` | Theme mode, auto-lock, language, security tips | `ThemeMode.kt`, `UserPreferences.kt` (DataStore) |
 | `feature.home` | Dashboard with stats, vault status, security tip, FAB | `HomeScreen.kt`, `HomeViewModel.kt` |
-| `feature.vault` | Vault item list, add/edit form, item detail | `VaultScreen.kt`, `VaultViewModel.kt`, `AddEditItemScreen.kt`, `AddEditItemViewModel.kt`, `ItemDetailScreen.kt`, `ItemDetailViewModel.kt` |
+| `feature.vault` | Vault item list, dynamic add/edit/detail screens | `VaultScreen.kt`, `VaultViewModel.kt`, `DynamicFormScreen.kt`, `DynamicFormViewModel.kt`, `DynamicItemDetailScreen.kt`, `DynamicItemDetailViewModel.kt`, `DynamicField.kt` |
 | `feature.autofill` | Android Autofill Framework service, session, parser, field matcher, credential matcher, dataset builder, domain handler, repository, response builder | `PassGoAutofillService.kt`, `AutofillSession.kt`, `RequestParser.kt`, `FieldMatcher.kt`, `CredentialMatcher.kt`, `DatasetBuilder.kt`, `ResponseBuilder.kt`, `DomainHandler.kt`, `AutofillRepository.kt`, `AutofillField.kt`, `AutofillRequest.kt`, `AutofillCredential.kt`, `SessionState.kt` |
 | `feature.premium` | Premium upgrade (placeholder) | `PremiumScreen.kt` |
 | `feature.settings` | Theme selection, auto-lock timer, app version | `SettingsScreen.kt`, `SettingsViewModel.kt` |
@@ -267,7 +267,8 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 | M3C | **Autofill Polish, Compatibility & Security** (✅ Done) | Biometric auth, inline suggestions, UX polish, accessibility, compatibility, security hardening, error recovery |
 | M4A | **Vault Organization** (✅ Done) | Smart folders, tags, favorites, archive, trash, smart collections |
 | M4B | **Architecture Refinements** (✅ Done) | FieldId enum, FieldDefinition sealed class, CustomField entity/DAO/repository, custom_fields table, unified search via LEFT JOIN, migration 3→4, unit tests |
-| M4C | **Advanced Search & Attachments** (⏳ Pending) | Full-text search, file attachments, preview |
+| M4C | **Dynamic Vault Type Engine** (✅ Done) | FieldGroup enum, CategoryIconIdentifier, enhanced VaultItemCategory metadata, DynamicField composables, DynamicFormScreen/ViewModel, DynamicItemDetailScreen/ViewModel, dynamic navigation, zero per-type branching |
+| M4D | **Advanced Search & Attachments** (⏳ Pending) | Full-text search, file attachments, preview |
 | M5 | **Security + Polish** (⏳ Pending) | Auto-clear clipboard, security audit, accessibility, crash reporting |
 
 ---
@@ -367,14 +368,14 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 - [x] `ItemCard` composable: category icon, name, username, category label, favorite star
 
 #### Feature — Add/Edit Form
-- [x] `AddEditItemScreen` + `AddEditItemViewModel`: full form with name, username, email, password, website, notes, category dropdown, folder dropdown, favorite checkbox
+- [x] `DynamicFormScreen` + `DynamicFormViewModel`: generic form generated from FieldDefinition metadata, supporting category selector, folder picker, tag chips
 - [x] Input validation: name and password required, errors displayed inline
 - [x] Password generator integration: 20-char default with uppercase, lowercase, digits, symbols, no ambiguous
 - [x] Password strength indicator: reactive bar with label
 - [x] Password visibility toggle, save/update with loading spinner
 
 #### Feature — Item Detail
-- [x] `ItemDetailScreen` + `ItemDetailViewModel`: displays all fields with copy buttons for username, email, password, website
+- [x] `DynamicItemDetailScreen` + `DynamicItemDetailViewModel`: generic detail screen with field display, copy, URL open, archive/delete/trash actions
 - [x] Password show/hide toggle
 - [x] Open website via `ACTION_VIEW` intent with safe URL handling
 - [x] Edit/delete actions with delete confirmation dialog
@@ -621,7 +622,7 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 #### 1. Smart Folders
 - [x] Default folders (created on demand via "Create Folder" dialog)
 - [x] Custom folders with rename and delete
-- [x] Move items between folders (VaultScreen + ItemDetailScreen)
+- [x] Move items between folders (VaultScreen + DynamicItemDetailScreen)
 - [x] Folder selector dialog for moving items
 - [x] Rename dialog with current name pre-filled
 - [x] Delete with confirmation, items preserved (folder_id set to null)
@@ -631,8 +632,8 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 - [x] Create tag via "+ Tag" chip in filter row
 - [x] Delete tag with confirmation (removed from all items)
 - [x] Filter by one or more tags (AND logic via HAVING COUNT)
-- [x] Tag selection chips in AddEditItemScreen
-- [x] Tag display chips in ItemDetailScreen
+- [x] Tag selection chips in DynamicFormScreen
+- [x] Tag display chips in DynamicItemDetailScreen
 - [x] Tag filter chips in VaultScreen
 - [x] Tag search via TagDao.searchTags()
 
@@ -647,7 +648,7 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 - [x] Unarchive/restore archived items (clears archived_at)
 - [x] Archived items hidden from All Items, Recent, Favorites, Categories, Folders
 - [x] Archived smart collection to view archived items
-- [x] Archive action in overflow menu (VaultScreen long-press, ItemDetailScreen)
+- [x] Archive action in overflow menu (VaultScreen long-press, DynamicItemDetailScreen)
 
 #### 5. Trash
 - [x] Soft delete (sets deleted_at timestamp) — already existed
@@ -823,10 +824,11 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 |---|---|---|
 | `feature/vault/VaultViewModel.kt` | 123 | Reactive multi-filter list state |
 | `feature/vault/VaultScreen.kt` | 332 | Search, sort, filter chips, LazyColumn, FAB, empty state |
-| `feature/vault/AddEditItemViewModel.kt` | 177 | Full form VM with validation + password generator |
-| `feature/vault/AddEditItemScreen.kt` | 301 | Add/edit form with category/folder dropdowns, strength indicator |
-| `feature/vault/ItemDetailViewModel.kt` | 86 | Detail VM with copy, show/hide, open URL, delete |
-| `feature/vault/ItemDetailScreen.kt` | 259 | Detail screen with copy/Snackbar, show/hide, open, delete dialog |
+| `feature/vault/DynamicFormViewModel.kt` | 210 | Generic form state with combine load, map-based field storage |
+| `feature/vault/DynamicFormScreen.kt` | 295 | Fully generic Add/Edit: category selector, folder picker, tag chips, fields in definition order |
+| `feature/vault/DynamicItemDetailViewModel.kt` | 150 | Atomic combine load, clipboard copy, URL open, delete/archive |
+| `feature/vault/DynamicItemDetailScreen.kt` | 195 | Generic detail view, overflow menu, copy feedback, dialogs |
+| `feature/vault/DynamicField.kt` | 370 | Dispatcher + 7 input composables + detail display |
 
 **Core Components**
 | File | Lines | Purpose |
@@ -944,10 +946,6 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 | `data/repository/TagRepositoryImpl.kt` | 63 → 80 | Implemented searchTags, setItemTags |
 | `feature/vault/VaultViewModel.kt` | 123 → 240 | Complete rewrite: VaultCollection sealed class, collection routing, tag filtering, folder CRUD, tag CRUD, archive/trash actions |
 | `feature/vault/VaultScreen.kt` | 332 → 550+ | Complete rewrite: collection dropdown, tag chips, folder management dialogs, context menu, archive/trash, collection-aware empty states |
-| `feature/vault/AddEditItemViewModel.kt` | 179 → 195 | Added tag selection state, toggleTag, setItemTags on save |
-| `feature/vault/AddEditItemScreen.kt` | 301 → 315 | Added tag chip selection UI |
-| `feature/vault/ItemDetailViewModel.kt` | 87 → 110 | Added archiveItem, moveItem, tags loading, folders |
-| `feature/vault/ItemDetailScreen.kt` | 259 → 360+ | Added tag display chips, overflow menu (archive, move, delete) |
 
 ### Milestone 4B — New Files
 
@@ -980,3 +978,48 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 | `di/DatabaseModule.kt` | Added CustomFieldRepository @Binds + CustomFieldDao @Provides |
 | `data/mapper/Mappers.kt` | Added CustomFieldEntity↔CustomField mapping functions |
 | `core/database/dao/VaultItemDao.kt` | 4 search queries: LEFT JOIN custom_fields for unified search |
+
+### Milestone 4C — Dynamic Vault Type Engine (✅ Complete)
+
+**Goal:** Generate every Add/Edit/Detail screen from FieldDefinition metadata — zero per-type screens, category registry with full metadata, reusable DynamicField components.
+
+#### New Model Types
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `core/model/FieldGroup.kt` | 9 | Enum with 17 logical sections (General, Account, Credentials, Security, Personal Info, etc.) |
+| `core/model/CategoryIconIdentifier.kt` | 13 | Pure-model enum with 12 icon identifiers (no Compose dependency) |
+
+#### Enhanced Existing Model
+
+| File | Changes |
+|------|---------|
+| `core/model/VaultItemCategory.kt` | Added `icon` (CategoryIconIdentifier), `description`, `colorArgb`, `sortOrder`, `groups` (List<FieldGroup>), `fields` (List<FieldId>), `requiredFields`, `recommendedFields` — all 12 categories configured |
+| `core/model/FieldId.kt` | Added 5 standard identifiers: `NAME`, `USERNAME`, `PASSWORD`, `URL`, `NOTES` |
+| `core/model/FieldDefinition.kt` | Added 15 new definitions: 5 standard + 10 address/phone/bank/license fields (total 35+ registered) |
+
+#### New UI Components
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `core/ui/components/CategoryIconDisplay.kt` | 32 | CategoryIconIdentifier→ImageVector + color conversion |
+| `feature/vault/DynamicField.kt` | 370 | Dispatcher + 7 input composables + DynamicFieldDisplay for detail view |
+| `feature/vault/DynamicFormViewModel.kt` | 210 | Generic form state (Map<FieldId,FieldValue>), standard→VaultItem cols, custom→custom_fields, atomic combine load |
+| `feature/vault/DynamicFormScreen.kt` | 295 | Fully generic Add/Edit: category selector, folder picker, tag chips, all fields in definition order |
+| `feature/vault/DynamicItemDetailViewModel.kt` | 150 | Atomic combine load, clipboard copy, URL open, delete/archive |
+| `feature/vault/DynamicItemDetailScreen.kt` | 195 | Fully generic detail: groups headers, field values, overflow menu, dialogs |
+
+#### Modified Files
+
+| File | Changes |
+|------|---------|
+| `core/navigation/PassGoNavHost.kt` | Routes use DynamicFormScreen/DynamicItemDetailScreen exclusively; `vault/add?category={category}` with optional query param |
+| `feature/vault/VaultScreen.kt` | Replaced private `when(category)` CategoryIcon with generic component import |
+
+#### Key Decisions
+- `VaultItemCategory` enhanced as a one-stop registry — not a sealed interface; zero behavioral change to existing code
+- `CategoryIconIdentifier` kept pure-model; mapped in `CategoryIconDisplay.kt` via `toImageVector()` extension
+- Group rendering: section headers + all fields in flat definition order (no field→group partitioning)
+- Standard FieldIds (NAME, USERNAME, PASSWORD, URL, NOTES) map to VaultItem columns; all others to custom_fields table
+- Room Flows combined atomically via `combine` to prevent race conditions
+- Old `AddEditItemScreen`/`ItemDetailScreen`/`AddEditItemViewModel`/`ItemDetailViewModel` deleted in post-M4C cleanup (no nav references)

@@ -27,14 +27,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.passgo.app.core.model.VaultItemCategory
 import com.passgo.app.data.session.SessionManager
 import com.passgo.app.feature.home.HomeScreen
 import com.passgo.app.feature.premium.PremiumScreen
 import com.passgo.app.feature.settings.SettingsScreen
 import com.passgo.app.feature.setup.SetupScreen
 import com.passgo.app.feature.unlock.UnlockScreen
-import com.passgo.app.feature.vault.AddEditItemScreen
-import com.passgo.app.feature.vault.ItemDetailScreen
+import com.passgo.app.feature.vault.DynamicFormScreen
+import com.passgo.app.feature.vault.DynamicItemDetailScreen
 import com.passgo.app.feature.vault.VaultScreen
 
 sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
@@ -125,11 +126,22 @@ fun PassGoNavHost(sessionManager: SessionManager) {
                     )
                 }
                 composable(
-                    route = "vault/add",
-                    arguments = emptyList()
-                ) {
-                    AddEditItemScreen(
+                    route = "vault/add?category={category}",
+                    arguments = listOf(
+                        navArgument("category") {
+                            type = NavType.StringType
+                            defaultValue = null
+                            nullable = true
+                        }
+                    )
+                ) { backStackEntry ->
+                    val categoryName = backStackEntry.arguments?.getString("category")
+                    val category = categoryName?.let { name ->
+                        VaultItemCategory.entries.find { it.name == name }
+                    }
+                    DynamicFormScreen(
                         itemId = null,
+                        categoryArg = category,
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }
@@ -138,7 +150,7 @@ fun PassGoNavHost(sessionManager: SessionManager) {
                     arguments = listOf(navArgument("itemId") { type = NavType.StringType })
                 ) { backStackEntry ->
                     val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
-                    ItemDetailScreen(
+                    DynamicItemDetailScreen(
                         itemId = itemId,
                         onNavigateBack = { navController.popBackStack() },
                         onEdit = { id -> navController.navigate("vault/edit/$id") }
@@ -149,7 +161,7 @@ fun PassGoNavHost(sessionManager: SessionManager) {
                     arguments = listOf(navArgument("itemId") { type = NavType.StringType })
                 ) { backStackEntry ->
                     val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
-                    AddEditItemScreen(
+                    DynamicFormScreen(
                         itemId = itemId,
                         onNavigateBack = { navController.popBackStack() }
                     )

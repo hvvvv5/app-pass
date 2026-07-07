@@ -64,6 +64,7 @@ import com.passgo.app.core.model.Folder
 import com.passgo.app.core.model.Tag
 import com.passgo.app.core.model.VaultItem
 import com.passgo.app.core.model.VaultItemCategory
+import com.passgo.app.core.ui.components.CategoryIcon
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -750,27 +751,6 @@ private fun ItemCard(
             }
         }
     }
-}
-
-@Composable
-private fun CategoryIcon(category: VaultItemCategory) {
-    val icon = when (category) {
-        VaultItemCategory.GOOGLE_ACCOUNT, VaultItemCategory.EMAIL -> Icons.Default.Folder
-        VaultItemCategory.SOCIAL_MEDIA, VaultItemCategory.ENTERTAINMENT,
-        VaultItemCategory.GAMING -> Icons.Default.Star
-        VaultItemCategory.BANKING, VaultItemCategory.SHOPPING,
-        VaultItemCategory.WORK -> Icons.Default.Folder
-        VaultItemCategory.WIFI -> Icons.Default.Folder
-        VaultItemCategory.SOFTWARE_LICENSE -> Icons.Default.Folder
-        VaultItemCategory.SECURE_NOTE -> Icons.Default.Folder
-        VaultItemCategory.OTHER -> Icons.Outlined.Folder
-    }
-    Icon(
-        icon,
-        contentDescription = null,
-        modifier = Modifier.size(32.dp),
-        tint = MaterialTheme.colorScheme.primary
-    )
 }
 
 private fun collectionDisplayName(collection: VaultCollection): String = when (collection) {
