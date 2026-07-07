@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
@@ -56,26 +58,29 @@ class SearchViewModel @Inject constructor(
     private val _selectedCategory = MutableStateFlow<VaultItemCategory?>(null)
     val selectedCategory: StateFlow<VaultItemCategory?> = _selectedCategory.asStateFlow()
 
-    val searchState: StateFlow<SearchState> = _query
-        .debounce(300)
-        .distinctUntilChanged()
-        .flatMapLatest { q ->
+    val searchState: StateFlow<SearchState> = combine(
+        _query.debounce(300).distinctUntilChanged(),
+        _selectedCategory
+    ) { q, category ->
+        Pair(q, category)
+    }.flatMapLatest { (q, category) ->
             if (q.isBlank()) {
                 flowOf(SearchState.Idle)
             } else {
                 val ftsQuery = formatFtsQuery(q)
-                val category = _selectedCategory.value
-                val searchFlow = if (category != null) {
-                    vaultItemRepository.searchByTypeFts(vaultId, category, ftsQuery)
-                } else {
-                    vaultItemRepository.searchItemsFts(vaultId, ftsQuery)
-                }
-                kotlinx.coroutines.flow.flow<SearchState> {
+                flow<SearchState> {
                     emit(SearchState.Loading(q))
+                    val searchFlow = if (category != null) {
+                        vaultItemRepository.searchByTypeFts(vaultId, category, ftsQuery)
+                    } else {
+                        vaultItemRepository.searchItemsFts(vaultId, ftsQuery)
+                    }
                     emitAll(searchFlow.map { items: List<VaultItem> ->
                         if (items.isEmpty()) SearchState.Empty
                         else SearchState.Results(items, q)
                     })
+                }.catch { e ->
+                    emit(SearchState.Error("Search failed: ${e.message}"))
                 }
             }
         }
@@ -102,10 +107,6 @@ class SearchViewModel @Inject constructor(
 
     fun onCategorySelected(category: VaultItemCategory?) {
         _selectedCategory.value = category
-        val currentQuery = _query.value
-        if (currentQuery.isNotBlank()) {
-            _query.value = currentQuery
-        }
     }
 
     fun onRecentSearchTapped(query: String) {
@@ -154,7 +155,7 @@ class SearchViewModel @Inject constructor(
         flow4: kotlinx.coroutines.flow.Flow<T4>,
         transform: suspend (T1, T2, T3, T4) -> R
     ): kotlinx.coroutines.flow.Flow<R> {
-        return kotlinx.coroutines.flow.combine(flow1, flow2, flow3, flow4) { a, b, c, d ->
+        return combine(flow1, flow2, flow3, flow4) { a, b, c, d ->
             transform(a, b, c, d)
         }
     }

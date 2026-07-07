@@ -10,14 +10,15 @@ import com.passgo.app.core.logging.PassGoLogger
 import com.passgo.app.core.model.Attachment
 import com.passgo.app.data.repository.AttachmentRepository
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -149,6 +150,37 @@ class AttachmentPreviewViewModelTest {
 
         val state = viewModel.state.value
         assertTrue(state is PreviewUiState.Error, "Expected Error but got ${state::class.simpleName}")
+    }
+
+    @Test
+    fun `reload cancels previous load and shows new attachment`() = runTest(testDispatcher) {
+        val suspend = MutableStateFlow(true)
+        val imageAttachment = Attachment(id = "img", itemId = "i1", name = "photo.png", mimeType = "image/png")
+        val textAttachment = Attachment(id = "txt", itemId = "i1", name = "notes.txt", mimeType = "text/plain")
+        val textBytes = "Hello".toByteArray()
+        val previewUri = mockk<Uri>()
+
+        coEvery { attachmentRepository.getAttachmentById("img") } returns suspend.flatMapLatest {
+            if (it) flowOf(imageAttachment) else flowOf(null)
+        }
+        coEvery { attachmentRepository.getAttachmentById("txt") } returns flowOf(textAttachment)
+        coEvery { attachmentRepository.getAttachmentPreviewUri(imageAttachment) } returns AppResult.Success(previewUri)
+        coEvery { attachmentRepository.getAttachmentFile(textAttachment) } returns AppResult.Success(textBytes)
+
+        viewModel = AttachmentPreviewViewModel(attachmentRepository, passGoLogger, context)
+
+        viewModel.loadAttachment("img")
+        advanceUntilIdle()
+
+        viewModel.loadAttachment("txt")
+        advanceUntilIdle()
+
+        suspend.value = false
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertTrue(state is PreviewUiState.TextContent, "Expected TextContent but got ${state::class.simpleName}")
+        assertEquals("notes.txt", (state as PreviewUiState.TextContent).attachment.name)
     }
 
     @Test

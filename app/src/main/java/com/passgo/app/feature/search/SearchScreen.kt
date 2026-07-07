@@ -44,7 +44,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -186,7 +185,7 @@ private fun RecentSearchesSection(
                 TextButton(onClick = onClearAll) {
                     Icon(
                         Icons.Default.DeleteSweep,
-                        contentDescription = null,
+                        contentDescription = "Clear search history",
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -233,7 +232,7 @@ private fun RecentSearchRow(
     ) {
         Icon(
             Icons.Default.History,
-            contentDescription = null,
+            contentDescription = "Recent search",
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(20.dp)
         )
@@ -344,7 +343,7 @@ private fun EmptySearchState() {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 Icons.Default.SearchOff,
-                contentDescription = null,
+                contentDescription = "No results found",
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )

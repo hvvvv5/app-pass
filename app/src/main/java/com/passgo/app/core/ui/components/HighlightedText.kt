@@ -3,11 +3,11 @@ package com.passgo.app.core.ui.components
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
@@ -34,10 +34,12 @@ fun HighlightedText(
         return
     }
 
-    val regex = query.split(Regex("\\s+"))
-        .filter { it.isNotBlank() }
-        .joinToString("|") { Regex.escape(it) }
-        .let { Regex(it, RegexOption.IGNORE_CASE) }
+    val regex = remember(query) {
+        query.split(Regex("\\s+"))
+            .filter { it.isNotBlank() }
+            .joinToString("|") { Regex.escape(it) }
+            .let { Regex(it, RegexOption.IGNORE_CASE) }
+    }
 
     val annotated = buildAnnotatedString {
         var lastIndex = 0

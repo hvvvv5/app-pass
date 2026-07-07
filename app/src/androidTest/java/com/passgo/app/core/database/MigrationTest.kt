@@ -2,11 +2,12 @@ package com.passgo.app.core.database
 
 import android.content.Context
 import androidx.room.Room
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import org.junit.After
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,6 +25,42 @@ class MigrationTest {
         context.deleteDatabase("migration_test.db")
     }
 
+    private fun queryTables(database: SupportSQLiteDatabase, where: String): List<String> {
+        val cursor = database.query(SimpleSQLiteQuery(
+            "SELECT name FROM sqlite_master WHERE type='table' AND $where"
+        ))
+        val tables = mutableListOf<String>()
+        while (cursor.moveToNext()) {
+            tables.add(cursor.getString(0))
+        }
+        cursor.close()
+        return tables
+    }
+
+    private fun queryTriggers(database: SupportSQLiteDatabase, where: String): List<String> {
+        val cursor = database.query(SimpleSQLiteQuery(
+            "SELECT name FROM sqlite_master WHERE type='trigger' AND $where"
+        ))
+        val triggers = mutableListOf<String>()
+        while (cursor.moveToNext()) {
+            triggers.add(cursor.getString(0))
+        }
+        cursor.close()
+        return triggers
+    }
+
+    private fun querySingleValue(database: SupportSQLiteDatabase, sql: String): String {
+        val cursor = database.query(SimpleSQLiteQuery(sql))
+        cursor.moveToFirst()
+        val value = cursor.getString(0)
+        cursor.close()
+        return value
+    }
+
+    private fun queryRow(database: SupportSQLiteDatabase, sql: String): android.database.Cursor {
+        return database.query(SimpleSQLiteQuery(sql))
+    }
+
     @Test
     fun databaseCreation_createsAllTables() {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -35,18 +72,8 @@ class MigrationTest {
             .openHelperFactory(factory)
             .build()
 
-        db.openDb()
-        val database = db.getOpenHelper().readableDatabase
-
-        val cursor = database.rawQuery(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'room_%' AND name NOT LIKE 'android_%' AND name NOT LIKE 'items_fts%'",
-            null
-        )
-        val tables = mutableListOf<String>()
-        while (cursor.moveToNext()) {
-            tables.add(cursor.getString(0))
-        }
-        cursor.close()
+        val database = db.openHelper.readableDatabase
+        val tables = queryTables(database, "name NOT LIKE 'sqlite_%' AND name NOT LIKE 'room_%' AND name NOT LIKE 'android_%' AND name NOT LIKE 'items_fts%'")
 
         assertTrue("vaults table missing", tables.contains("vaults"))
         assertTrue("vault_items table missing", tables.contains("vault_items"))
@@ -87,31 +114,13 @@ class MigrationTest {
             .openHelperFactory(factory)
             .build()
 
-        db.openDb()
-        val database = db.getOpenHelper().readableDatabase
-
-        val cursor = database.rawQuery(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'items_fts%'",
-            null
-        )
-        val ftsTables = mutableListOf<String>()
-        while (cursor.moveToNext()) {
-            ftsTables.add(cursor.getString(0))
-        }
-        cursor.close()
+        val database = db.openHelper.readableDatabase
+        val ftsTables = queryTables(database, "name LIKE 'items_fts%'")
 
         assertTrue("items_fts table missing", ftsTables.contains("items_fts"))
         assertTrue("items_fts_content missing", ftsTables.contains("items_fts_content"))
 
-        val triggerCursor = database.rawQuery(
-            "SELECT name FROM sqlite_master WHERE type='trigger' AND name LIKE 'items_fts_%'",
-            null
-        )
-        val triggers = mutableListOf<String>()
-        while (triggerCursor.moveToNext()) {
-            triggers.add(triggerCursor.getString(0))
-        }
-        triggerCursor.close()
+        val triggers = queryTriggers(database, "name LIKE 'items_fts_%'")
 
         assertTrue("items_fts_insert trigger missing", triggers.contains("items_fts_insert"))
         assertTrue("items_fts_delete trigger missing", triggers.contains("items_fts_delete"))
@@ -134,13 +143,12 @@ class MigrationTest {
             .openHelperFactory(factory)
             .build()
 
-        db.openDb()
-        val database = db.getOpenHelper().writableDatabase
+        val database = db.openHelper.writableDatabase
 
         database.execSQL("INSERT INTO vaults (id, name) VALUES ('v1', 'Test Vault')")
         database.execSQL("INSERT INTO vault_items (id, vault_id, type, name, username, email, url, notes) VALUES ('i1', 'v1', 'LOGIN', 'GitHub', 'user', 'user@test.com', 'https://github.com', 'My notes')")
 
-        val cursor = database.rawQuery("SELECT item_id, name, username, email, url, notes FROM items_fts WHERE item_id = 'i1'", null)
+        val cursor = queryRow(database, "SELECT item_id, name, username, email, url, notes FROM items_fts WHERE item_id = 'i1'")
         assertTrue("FTS row should exist after insert", cursor.moveToFirst())
         assertEqualsString("GitHub", cursor.getString(cursor.getColumnIndexOrThrow("name")))
         assertEqualsString("user", cursor.getString(cursor.getColumnIndexOrThrow("username")))
@@ -160,17 +168,14 @@ class MigrationTest {
             .openHelperFactory(factory)
             .build()
 
-        db.openDb()
-        val database = db.getOpenHelper().writableDatabase
+        val database = db.openHelper.writableDatabase
 
         database.execSQL("INSERT INTO vaults (id, name) VALUES ('v2', 'Test Vault')")
         database.execSQL("INSERT INTO vault_items (id, vault_id, type, name) VALUES ('i2', 'v2', 'LOGIN', 'ToDelete')")
         database.execSQL("DELETE FROM vault_items WHERE id = 'i2'")
 
-        val cursor = database.rawQuery("SELECT COUNT(*) FROM items_fts WHERE item_id = 'i2'", null)
-        cursor.moveToFirst()
-        assertEqualsString("0", cursor.getString(0))
-        cursor.close()
+        val count = querySingleValue(database, "SELECT COUNT(*) FROM items_fts WHERE item_id = 'i2'")
+        assertEqualsString("0", count)
 
         db.close()
     }
@@ -186,16 +191,13 @@ class MigrationTest {
             .openHelperFactory(factory)
             .build()
 
-        db.openDb()
-        val database = db.getOpenHelper().writableDatabase
+        val database = db.openHelper.writableDatabase
 
         database.execSQL("INSERT INTO vaults (id, name) VALUES ('v3', 'Test Vault')")
         database.execSQL("INSERT INTO vault_items (id, vault_id, type, name, username, notes) VALUES ('i3', 'v3', 'LOGIN', 'GitHub Account', 'dev@github.com', 'My repository')")
 
-        val cursor = database.rawQuery("SELECT item_id FROM items_fts WHERE items_fts MATCH 'github'", null)
-        assertTrue("FTS MATCH should return results for 'github'", cursor.moveToFirst())
-        assertEqualsString("i3", cursor.getString(0))
-        cursor.close()
+        val id = querySingleValue(database, "SELECT item_id FROM items_fts WHERE items_fts MATCH 'github'")
+        assertEqualsString("i3", id)
 
         db.close()
     }

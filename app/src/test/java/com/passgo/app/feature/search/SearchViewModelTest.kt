@@ -213,6 +213,22 @@ class SearchViewModelTest {
     }
 
     @Test
+    fun `repository exception emits Error state`() = runTest(testDispatcher) {
+        every { vaultItemRepository.searchItemsFts(any(), any()) } throws
+            RuntimeException("Network error")
+        every { searchHistoryRepository.getRecentSearches(any()) } returns flowOf(emptyList())
+
+        viewModel = SearchViewModel(vaultItemRepository, searchHistoryRepository)
+
+        val job = launch { viewModel.searchState.collect { } }
+        viewModel.onQueryChanged("test")
+        advanceUntilIdle()
+        val state = viewModel.searchState.value
+        assertTrue(state is SearchState.Error, "Expected Error but got $state")
+        job.cancel()
+    }
+
+    @Test
     fun `uiState reflects all properties`() = runTest(testDispatcher) {
         val searches = listOf(
             SearchHistory(id = "h1", vaultId = "default", query = "aws", createdAt = 1000L)

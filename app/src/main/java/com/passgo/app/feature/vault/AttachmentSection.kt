@@ -141,7 +141,7 @@ fun AttachmentSection(
                 CircularProgressIndicator(modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
             } else {
-                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.Add, contentDescription = "Add attachment", modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(4.dp))
             }
             Text("Add Attachment")
@@ -187,7 +187,7 @@ private fun AttachmentRow(
     ) {
         Icon(
             imageVector = mimeTypeIcon(attachment.mimeType),
-            contentDescription = null,
+            contentDescription = attachment.mimeType,
             modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.primary
         )

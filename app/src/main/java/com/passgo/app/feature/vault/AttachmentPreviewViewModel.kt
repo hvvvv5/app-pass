@@ -12,6 +12,7 @@ import com.passgo.app.data.repository.AttachmentRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,13 +35,15 @@ class AttachmentPreviewViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var currentAttachmentId: String? = null
+    private var loadJob: Job? = null
 
     private val _state = MutableStateFlow<PreviewUiState>(PreviewUiState.Loading)
     val state: StateFlow<PreviewUiState> = _state.asStateFlow()
 
     fun loadAttachment(attachmentId: String) {
         currentAttachmentId = attachmentId
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _state.value = PreviewUiState.Loading
             attachmentRepository.getAttachmentById(attachmentId).collect { attachment ->
                 if (attachment != null) {
