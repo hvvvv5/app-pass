@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -31,6 +32,7 @@ import com.passgo.app.core.model.VaultItemCategory
 import com.passgo.app.data.session.SessionManager
 import com.passgo.app.feature.home.HomeScreen
 import com.passgo.app.feature.premium.PremiumScreen
+import com.passgo.app.feature.search.SearchScreen
 import com.passgo.app.feature.settings.SettingsScreen
 import com.passgo.app.feature.setup.SetupScreen
 import com.passgo.app.feature.unlock.UnlockScreen
@@ -42,6 +44,7 @@ sealed class Screen(val route: String, val label: String, val icon: ImageVector)
     data object Setup : Screen("setup", "", Icons.Default.Lock)
     data object Unlock : Screen("unlock", "", Icons.Default.Lock)
     data object Home : Screen("home", "Home", Icons.Default.Home)
+    data object Search : Screen("search", "Search", Icons.Default.Search)
     data object Vault : Screen("vault", "Vault", Icons.Default.Lock)
     data object Premium : Screen("premium", "Premium", Icons.Default.Star)
     data object Settings : Screen("settings", "Settings", Icons.Default.Settings)
@@ -114,9 +117,8 @@ fun PassGoNavHost(sessionManager: SessionManager) {
                 }
                 composable(Screen.Home.route) {
                     HomeScreen(
-                        onAddItem = {
-                            navController.navigate("vault/add")
-                        }
+                        onAddItem = { navController.navigate("vault/add") },
+                        onSearchClick = { navController.navigate(Screen.Search.route) }
                     )
                 }
                 composable(Screen.Vault.route) {
@@ -163,6 +165,12 @@ fun PassGoNavHost(sessionManager: SessionManager) {
                     val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
                     DynamicFormScreen(
                         itemId = itemId,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+                composable(Screen.Search.route) {
+                    SearchScreen(
+                        onItemClick = { itemId -> navController.navigate("vault/detail/$itemId") },
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }
