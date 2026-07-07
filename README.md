@@ -83,10 +83,10 @@ There are no per-category composables, ViewModels, or navigation routes. The `Dy
 | Reusable FieldDefinition validation engine | ✅ |
 | Dynamic category rendering | ✅ |
 | Generic custom field architecture | ✅ |
-| Full-Text Search (FTS4)	✅
-| Search History & Suggestions	✅
-| Encrypted File Attachments	✅
-| Attachment Preview	✅
+| Full-Text Search (FTS4)	✅ |
+| Search History & Suggestions	✅ |
+| Encrypted File Attachments	✅ |
+| Attachment Preview	✅ |
 ## Screens
 
 | Screen | Route | Description |
@@ -142,9 +142,9 @@ There are no per-category composables, ViewModels, or navigation routes. The `Dy
 
 | Feature | Status |
 |---|---|
-| Advanced Search & Attachments | ⏳ Pending |
-| Full-text search improvements | ⏳ Pending |
-| Encrypted file attachments | ⏳ Pending |
+| Advanced Search & Attachments | ✅ Pending |
+| Full-text search improvements | ✅ Pending |
+| Encrypted file attachments | ✅ Pending |
 | Clipboard security (auto-clear) | ⏳ Pending |
 | Security audit & hardening | ⏳ Pending |
 | Backup / restore | ⏳ Pending |
