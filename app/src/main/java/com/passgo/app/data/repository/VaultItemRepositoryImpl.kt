@@ -134,4 +134,16 @@ class VaultItemRepositoryImpl @Inject constructor(
         onSuccess = { AppResult.Success(Unit) },
         onFailure = { AppResult.Error(AppException.fromThrowable(it)) }
     )
+
+    override fun searchItemsFts(vaultId: String, query: String): Flow<List<VaultItem>> =
+        vaultItemDao.searchItemsFts(vaultId, query).map { list -> list.map { it.toDomain() } }
+
+    override fun searchByTypeFts(vaultId: String, type: VaultItemCategory, query: String): Flow<List<VaultItem>> =
+        vaultItemDao.searchByTypeFts(vaultId, type.name, query).map { list -> list.map { it.toDomain() } }
+
+    override fun searchFavoritesFts(vaultId: String, query: String): Flow<List<VaultItem>> =
+        vaultItemDao.searchFavoritesFts(vaultId, query).map { list -> list.map { it.toDomain() } }
+
+    override fun searchByFolderFts(vaultId: String, folderId: String, query: String): Flow<List<VaultItem>> =
+        vaultItemDao.searchByFolderFts(vaultId, folderId, query).map { list -> list.map { it.toDomain() } }
 }

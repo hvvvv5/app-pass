@@ -5,6 +5,7 @@ import com.passgo.app.core.database.PassGoDatabase
 import com.passgo.app.core.database.dao.AttachmentDao
 import com.passgo.app.core.database.dao.CustomFieldDao
 import com.passgo.app.core.database.dao.FolderDao
+import com.passgo.app.core.database.dao.SearchHistoryDao
 import com.passgo.app.core.database.dao.TagDao
 import com.passgo.app.core.database.dao.VaultDao
 import com.passgo.app.core.database.dao.VaultItemDao
@@ -15,6 +16,8 @@ import com.passgo.app.data.repository.CustomFieldRepository
 import com.passgo.app.data.repository.CustomFieldRepositoryImpl
 import com.passgo.app.data.repository.FolderRepository
 import com.passgo.app.data.repository.FolderRepositoryImpl
+import com.passgo.app.data.repository.SearchHistoryRepository
+import com.passgo.app.data.repository.SearchHistoryRepositoryImpl
 import com.passgo.app.data.repository.TagRepository
 import com.passgo.app.data.repository.TagRepositoryImpl
 import com.passgo.app.data.repository.VaultItemRepository
@@ -57,6 +60,10 @@ abstract class DatabaseModule {
     @Singleton
     abstract fun bindCustomFieldRepository(impl: CustomFieldRepositoryImpl): CustomFieldRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindSearchHistoryRepository(impl: SearchHistoryRepositoryImpl): SearchHistoryRepository
+
     companion object {
         @Provides
         @Singleton
@@ -85,5 +92,8 @@ abstract class DatabaseModule {
 
         @Provides
         fun provideCustomFieldDao(database: PassGoDatabase): CustomFieldDao = database.customFieldDao()
+
+        @Provides
+        fun provideSearchHistoryDao(database: PassGoDatabase): SearchHistoryDao = database.searchHistoryDao()
     }
 }

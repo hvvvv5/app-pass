@@ -126,4 +126,39 @@ interface VaultItemDao {
 
     @Query("SELECT COUNT(*) FROM vault_items WHERE deleted_at IS NOT NULL AND deleted_at < :threshold")
     fun getOldTrashCount(threshold: Long): Flow<Int>
+
+    @Query("""
+        SELECT vi.* FROM vault_items vi
+        INNER JOIN items_fts fts ON vi.id = fts.item_id
+        WHERE items_fts MATCH :query
+        AND vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL
+    """)
+    fun searchItemsFts(vaultId: String, query: String): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT vi.* FROM vault_items vi
+        INNER JOIN items_fts fts ON vi.id = fts.item_id
+        WHERE items_fts MATCH :query
+        AND vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL
+        AND vi.type = :type
+    """)
+    fun searchByTypeFts(vaultId: String, type: String, query: String): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT vi.* FROM vault_items vi
+        INNER JOIN items_fts fts ON vi.id = fts.item_id
+        WHERE items_fts MATCH :query
+        AND vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL
+        AND vi.favorite = 1
+    """)
+    fun searchFavoritesFts(vaultId: String, query: String): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT vi.* FROM vault_items vi
+        INNER JOIN items_fts fts ON vi.id = fts.item_id
+        WHERE items_fts MATCH :query
+        AND vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL
+        AND vi.folder_id = :folderId
+    """)
+    fun searchByFolderFts(vaultId: String, folderId: String, query: String): Flow<List<VaultItemEntity>>
 }

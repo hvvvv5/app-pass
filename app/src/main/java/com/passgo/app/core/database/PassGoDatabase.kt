@@ -9,12 +9,15 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.passgo.app.core.database.dao.AttachmentDao
 import com.passgo.app.core.database.dao.CustomFieldDao
 import com.passgo.app.core.database.dao.FolderDao
+import com.passgo.app.core.database.dao.SearchHistoryDao
 import com.passgo.app.core.database.dao.TagDao
 import com.passgo.app.core.database.dao.VaultDao
 import com.passgo.app.core.database.dao.VaultItemDao
 import com.passgo.app.core.database.entity.AttachmentEntity
 import com.passgo.app.core.database.entity.CustomFieldEntity
 import com.passgo.app.core.database.entity.FolderEntity
+import com.passgo.app.core.database.entity.ItemsFtsEntity
+import com.passgo.app.core.database.entity.SearchHistoryEntity
 import com.passgo.app.core.database.entity.TagEntity
 import com.passgo.app.core.database.entity.TagItemCrossRef
 import com.passgo.app.core.database.entity.VaultEntity
@@ -29,9 +32,11 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         TagEntity::class,
         TagItemCrossRef::class,
         AttachmentEntity::class,
-        CustomFieldEntity::class
+        CustomFieldEntity::class,
+        ItemsFtsEntity::class,
+        SearchHistoryEntity::class
     ],
-    version = 4,
+    version = 6,
     exportSchema = true
 )
 abstract class PassGoDatabase : RoomDatabase() {
@@ -42,6 +47,7 @@ abstract class PassGoDatabase : RoomDatabase() {
     abstract fun tagDao(): TagDao
     abstract fun attachmentDao(): AttachmentDao
     abstract fun customFieldDao(): CustomFieldDao
+    abstract fun searchHistoryDao(): SearchHistoryDao
 
     companion object {
         private const val DB_NAME = "passgo_vault.db"

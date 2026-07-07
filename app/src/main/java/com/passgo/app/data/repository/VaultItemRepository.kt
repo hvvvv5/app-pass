@@ -32,4 +32,9 @@ interface VaultItemRepository {
     suspend fun unarchive(id: String): AppResult<Unit>
     suspend fun moveItem(itemId: String, folderId: String?): AppResult<Unit>
     suspend fun permanentDeleteOldTrash(threshold: Long): AppResult<Unit>
+
+    fun searchItemsFts(vaultId: String, query: String): Flow<List<VaultItem>>
+    fun searchByTypeFts(vaultId: String, type: VaultItemCategory, query: String): Flow<List<VaultItem>>
+    fun searchFavoritesFts(vaultId: String, query: String): Flow<List<VaultItem>>
+    fun searchByFolderFts(vaultId: String, folderId: String, query: String): Flow<List<VaultItem>>
 }
