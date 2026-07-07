@@ -105,6 +105,15 @@ There are no per-category composables, ViewModels, or navigation routes. The `Dy
 ```powershell
 .\gradlew :app:assembleDebug
 .\gradlew testDebugUnitTest
+.\gradlew connectedDebugAndroidTest
+```
+
+### Linux / macOS
+
+```bash
+./gradlew :app:assembleDebug
+./gradlew testDebugUnitTest
+./gradlew connectedDebugAndroidTest
 ```
 
 ## Milestones
@@ -125,3 +134,15 @@ There are no per-category composables, ViewModels, or navigation routes. The `Dy
 | M4D.3 | Developer & Infrastructure Vault Templates (GitHub, GitLab, Docker Hub, AWS, Azure, GCP, SSH Key, Database) | ✅ Complete |
 | M4D | Advanced Search & Attachments (full-text, files, preview) | ⏳ Pending |
 | M5 | Security + Polish (clipboard, audit, accessibility) | ⏳ Pending |
+
+## Roadmap
+
+| Feature | Status |
+|---|---|
+| Advanced Search & Attachments | ⏳ Pending |
+| Full-text search improvements | ⏳ Pending |
+| Encrypted file attachments | ⏳ Pending |
+| Clipboard security (auto-clear) | ⏳ Pending |
+| Security audit & hardening | ⏳ Pending |
+| Backup / restore | ⏳ Pending |
+| Cloud sync | ⏳ Pending |
