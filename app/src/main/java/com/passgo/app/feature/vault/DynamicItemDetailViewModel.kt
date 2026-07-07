@@ -128,7 +128,7 @@ class DynamicItemDetailViewModel @Inject constructor(
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText(label, text))
         _copyFeedback.value = "$label copied"
-        logger.info("DynamicItemDetailViewModel", "Copied $label to clipboard")
+        logger.info("DynamicItemDetailViewModel", "Field copied  to clipboard")
     }
 
     fun clearCopyFeedback() {
