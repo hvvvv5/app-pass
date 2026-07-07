@@ -198,6 +198,23 @@ sealed class FieldDefinition(
         }
     }
 
+    data object CreditCardPin : FieldDefinition(
+        fieldId = FieldId.CREDIT_CARD_PIN,
+        label = "PIN",
+        iconLabel = "PIN",
+        inputType = FieldInputType.PASSWORD,
+        maxLength = 6,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            val cleaned = value.filter { it.isDigit() }
+            if (cleaned.isEmpty()) return FieldValidationResult.Valid
+            if (cleaned.length < 4 || cleaned.length > 6)
+                return FieldValidationResult.Invalid("PIN must be 4-6 digits")
+            return FieldValidationResult.Valid
+        }
+    }
+
     // ── Bank ─────────────────────────────────────────────────
 
     data object Iban : FieldDefinition(
@@ -377,6 +394,33 @@ sealed class FieldDefinition(
         }
     }
 
+    data object MerchantId : FieldDefinition(
+        fieldId = FieldId.MERCHANT_ID,
+        label = "Merchant ID",
+        iconLabel = "Merchant",
+        inputType = FieldInputType.TEXT,
+        maxLength = 128,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Merchant ID is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object CustomerId : FieldDefinition(
+        fieldId = FieldId.CUSTOMER_ID,
+        label = "Customer ID",
+        iconLabel = "Customer",
+        inputType = FieldInputType.TEXT,
+        maxLength = 128,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
+    }
+
     // ── Wi-Fi ────────────────────────────────────────────────
 
     data object WifiSsid : FieldDefinition(
@@ -507,6 +551,22 @@ sealed class FieldDefinition(
         }
     }
 
+    data object PayPalEmail : FieldDefinition(
+        fieldId = FieldId.PAYPAL_EMAIL,
+        label = "PayPal Email",
+        iconLabel = "PayPal",
+        inputType = FieldInputType.EMAIL,
+        maxLength = 256,
+        autofillHint = "email"
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Email is required")
+            if (!value.contains("@"))
+                return FieldValidationResult.Invalid("Must be a valid email address")
+            return FieldValidationResult.Valid
+        }
+    }
+
     // ── Bank Details ─────────────────────────────────────────
 
     data object SwiftBic : FieldDefinition(
@@ -526,6 +586,94 @@ sealed class FieldDefinition(
 
         override fun format(value: String): String = value.uppercase()
         override fun parse(raw: String): String = raw.uppercase()
+    }
+
+    data object BankName : FieldDefinition(
+        fieldId = FieldId.BANK_NAME,
+        label = "Bank Name",
+        iconLabel = "Bank",
+        inputType = FieldInputType.TEXT,
+        maxLength = 128,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Bank name is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object AccountHolder : FieldDefinition(
+        fieldId = FieldId.ACCOUNT_HOLDER,
+        label = "Account Holder",
+        iconLabel = "Holder",
+        inputType = FieldInputType.TEXT,
+        maxLength = 128,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Account holder is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object Branch : FieldDefinition(
+        fieldId = FieldId.BRANCH,
+        label = "Branch",
+        iconLabel = "Branch",
+        inputType = FieldInputType.TEXT,
+        maxLength = 128,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object Currency : FieldDefinition(
+        fieldId = FieldId.CURRENCY,
+        label = "Currency",
+        iconLabel = "Currency",
+        inputType = FieldInputType.TEXT,
+        maxLength = 3,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Valid
+            val cleaned = value.filter { it.isLetter() }.uppercase()
+            if (cleaned.length != 3)
+                return FieldValidationResult.Invalid("Currency must be a 3-letter code (e.g. USD)")
+            return FieldValidationResult.Valid
+        }
+
+        override fun format(value: String): String = value.filter { it.isLetter() }.uppercase()
+        override fun parse(raw: String): String = raw.filter { it.isLetter() }.uppercase()
+    }
+
+    data object Beneficiary : FieldDefinition(
+        fieldId = FieldId.BENEFICIARY,
+        label = "Beneficiary",
+        iconLabel = "Beneficiary",
+        inputType = FieldInputType.TEXT,
+        maxLength = 128,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            if (value.isBlank()) return FieldValidationResult.Invalid("Beneficiary is required")
+            return FieldValidationResult.Valid
+        }
+    }
+
+    data object Reference : FieldDefinition(
+        fieldId = FieldId.REFERENCE,
+        label = "Reference",
+        iconLabel = "Reference",
+        inputType = FieldInputType.TEXT,
+        maxLength = 256,
+        autofillHint = null
+    ) {
+        override fun validate(value: String): FieldValidationResult {
+            return FieldValidationResult.Valid
+        }
     }
 
     // ── License Details ──────────────────────────────────────
@@ -718,15 +866,15 @@ sealed class FieldDefinition(
         private val allDefinitions: Map<FieldId, FieldDefinition> by lazy {
             listOf(
             ItemName, ItemUsername, ItemPassword, ItemUrl, ItemNotes,
-            CreditCardNumber, CreditCardCvv, CreditCardExpiry, CreditCardHolderName,
+            CreditCardNumber, CreditCardCvv, CreditCardExpiry, CreditCardHolderName, CreditCardPin,
             Iban, BankAccountNumber, BankRoutingNumber,
             PassportNumber, NationalIdNumber, DriverLicenseNumber, FullName, DateOfBirth,
-            ApiKey, ApiSecret,
+            ApiKey, ApiSecret, MerchantId, CustomerId,
             WifiSsid, WifiPassword,
             LicenseKey,
             LicenseType, LicenseRegisteredEmail, LicensePurchaseDate, LicenseExpiryDate,
             AddressLine1, AddressLine2, City, PostalCode, Country,
-            PhoneNumber, SwiftBic,
+            PhoneNumber, PayPalEmail, SwiftBic, BankName, AccountHolder, Branch, Currency, Beneficiary, Reference,
             ServerHostname, ServerPort,
             CustomLabel(FieldId.CUSTOM_LABEL),
             CustomText(FieldId.CUSTOM_TEXT),

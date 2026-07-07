@@ -3,6 +3,8 @@ package com.passgo.app.core.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.ContactMail
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Folder
@@ -10,6 +12,9 @@ import androidx.compose.material.icons.filled.Games
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Payment
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Wifi
@@ -36,6 +41,12 @@ fun CategoryIconIdentifier.toImageVector(): ImageVector = when (this) {
     CategoryIconIdentifier.WIFI -> Icons.Default.Wifi
     CategoryIconIdentifier.SOFTWARE_LICENSE -> Icons.Default.Description
     CategoryIconIdentifier.SECURE_NOTE -> Icons.Default.Dns
+    CategoryIconIdentifier.CREDIT_CARD -> Icons.Default.CreditCard
+    CategoryIconIdentifier.DEBIT_CARD -> Icons.Default.CreditCard
+    CategoryIconIdentifier.BANK_ACCOUNT -> Icons.Default.AccountBalance
+    CategoryIconIdentifier.PAYPAL -> Icons.Default.Payment
+    CategoryIconIdentifier.WISE -> Icons.AutoMirrored.Filled.Send
+    CategoryIconIdentifier.STRIPE -> Icons.Default.Lock
     CategoryIconIdentifier.OTHER -> Icons.Outlined.Folder
 }
 

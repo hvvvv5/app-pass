@@ -1,7 +1,7 @@
 # PROJECT_MAP — PassGo
 
 > **Last Updated:** 2026-07-07  
-> **Status:** Milestone 4C — Dynamic Vault Type Engine (Complete)  
+> **Status:** Milestone 4D.1 — Financial Vault Templates (Complete)  
 > **Target Platform:** Android 16 (API 36)
 
 ---
@@ -268,7 +268,7 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 | M4A | **Vault Organization** (✅ Done) | Smart folders, tags, favorites, archive, trash, smart collections |
 | M4B | **Architecture Refinements** (✅ Done) | FieldId enum, FieldDefinition sealed class, CustomField entity/DAO/repository, custom_fields table, unified search via LEFT JOIN, migration 3→4, unit tests |
 | M4C | **Dynamic Vault Type Engine** (✅ Done) | FieldGroup enum, CategoryIconIdentifier, enhanced VaultItemCategory metadata, DynamicField composables, DynamicFormScreen/ViewModel, DynamicItemDetailScreen/ViewModel, dynamic navigation, zero per-type branching |
-| M4D | **Advanced Search & Attachments** (⏳ Pending) | Full-text search, file attachments, preview |
+| M4D.1 | **Financial Vault Templates** (✅ Done) | 6 financial templates (Credit Card, Debit Card, Bank Account, PayPal, Wise, Stripe), 9 new FieldIds, 10 new FieldDefinitions, 6 CategoryIconIdentifiers, 102 tests |
 | M5 | **Security + Polish** (⏳ Pending) | Auto-clear clipboard, security audit, accessibility, crash reporting |
 
 ---
@@ -1023,3 +1023,72 @@ Used as a return type for all repository operations. Callers pattern-match to ha
 - Standard FieldIds (NAME, USERNAME, PASSWORD, URL, NOTES) map to VaultItem columns; all others to custom_fields table
 - Room Flows combined atomically via `combine` to prevent race conditions
 - Old `AddEditItemScreen`/`ItemDetailScreen`/`AddEditItemViewModel`/`ItemDetailViewModel` deleted in post-M4C cleanup (no nav references)
+
+### Milestone 4D.1 — Financial Vault Templates (✅ Complete)
+
+**Goal:** Implement 6 production-ready financial templates using the existing Dynamic Vault Type Engine — no new screens, ViewModels, repositories, or DAOs.
+
+#### New FieldIds (9)
+
+`BANK_NAME`, `ACCOUNT_HOLDER`, `BRANCH`, `CURRENCY`, `PAYPAL_EMAIL`, `MERCHANT_ID`, `CUSTOMER_ID`, `BENEFICIARY`, `REFERENCE`
+
+#### New FieldDefinitions (10)
+
+| Definition | FieldId | InputType | Validation |
+|------------|---------|-----------|------------|
+| `CreditCardPin` | CREDIT_CARD_PIN | PASSWORD | 4-6 digits; empty allowed (optional) |
+| `BankName` | BANK_NAME | TEXT | Required |
+| `AccountHolder` | ACCOUNT_HOLDER | TEXT | Required |
+| `Branch` | BRANCH | TEXT | Optional |
+| `Currency` | CURRENCY | TEXT | 3-letter code, uppercased/auto-format |
+| `PayPalEmail` | PAYPAL_EMAIL | EMAIL | Required, must contain @ |
+| `MerchantId` | MERCHANT_ID | TEXT | Required |
+| `CustomerId` | CUSTOMER_ID | TEXT | Optional |
+| `Beneficiary` | BENEFICIARY | TEXT | Required |
+| `Reference` | REFERENCE | TEXT | Optional |
+
+#### New Categories (6)
+
+| Category | Sort | Fields | Required |
+|----------|------|--------|----------|
+| CREDIT_CARD | 5 | NAME, Card Holder, Card Number, Expiry, CVV, PIN, Notes | NAME, Number, Expiry, CVV |
+| DEBIT_CARD | 6 | NAME, Card Holder, Card Number, Expiry, PIN, Bank Name, Notes | NAME, Number, Expiry |
+| BANK_ACCOUNT | 7 | NAME, Account Holder, Bank Name, Account Number, Routing, IBAN, SWIFT/BIC, Branch, Currency, Notes | NAME, Account Number |
+| PAYPAL | 8 | NAME, PayPal Email, Password, Phone, Notes | NAME, Email |
+| WISE | 9 | NAME, Beneficiary, IBAN, Account Holder, Bank Name, Account Number, SWIFT/BIC, Currency, Reference, Notes | NAME |
+| STRIPE | 10 | NAME, Merchant ID, Customer ID, API Key, API Secret, Email, Phone, URL, Notes | NAME |
+
+#### New CategoryIcons (6)
+
+`CREDIT_CARD` → `Icons.Default.CreditCard`, `DEBIT_CARD` → `Icons.Default.CreditCard`, `BANK_ACCOUNT` → `Icons.Default.AccountBalance`, `PAYPAL` → `Icons.Default.Payment`, `WISE` → `Icons.AutoMirrored.Filled.Send`, `STRIPE` → `Icons.Default.Lock`
+
+#### Sort Order Shift
+
+Existing categories shifted: SHOPPING→11, WORK→12, ENTERTAINMENT→13, GAMING→14, WIFI→15, SOFTWARE_LICENSE→16, SECURE_NOTE→17, OTHER→18
+
+#### Modified Files
+
+| File | Changes |
+|------|---------|
+| `core/model/FieldId.kt` | Added 9 financial identifiers (55→64 lines) |
+| `core/model/FieldDefinition.kt` | Added 10 definitions with validation/formatting, registered in `allDefinitions` (743→891 lines) |
+| `core/model/VaultItemCategory.kt` | Added 6 categories, updated sort orders 11→18 (143→209 lines) |
+| `core/model/CategoryIconIdentifier.kt` | Added 6 icon identifiers (16→22 lines) |
+| `core/ui/components/CategoryIconDisplay.kt` | Added 6 icon mappings (55→64 lines) |
+
+#### Test Files Modified
+
+| File | Changes |
+|------|---------|
+| `test/.../FieldIdTest.kt` | Added 9 name stability asserts (52→61 lines) |
+| `test/.../FieldDefinitionTest.kt` | Added 10 test classes: CreditCardPin, BankName, AccountHolder, Currency, PayPalEmail, MerchantId, Beneficiary, Branch, CustomerId, Reference (232→434 lines) |
+
+#### Verification
+
+| Check | Result |
+|-------|--------|
+| `compileDebugKotlin` | ✅ Zero errors, zero warnings |
+| `assembleDebug` | ✅ |
+| `testDebugUnitTest` | ✅ 102 tests pass |
+| TODO/FIXME/HACK | Zero |
+| Deprecated APIs | Zero (Send icon uses AutoMirrored) |

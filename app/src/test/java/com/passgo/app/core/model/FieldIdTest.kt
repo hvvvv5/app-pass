@@ -32,6 +32,15 @@ class FieldIdTest {
         assertEquals("CUSTOM_URL", FieldId.CUSTOM_URL.name)
         assertEquals("CUSTOM_DATE", FieldId.CUSTOM_DATE.name)
         assertEquals("CUSTOM_EMAIL", FieldId.CUSTOM_EMAIL.name)
+        assertEquals("BANK_NAME", FieldId.BANK_NAME.name)
+        assertEquals("ACCOUNT_HOLDER", FieldId.ACCOUNT_HOLDER.name)
+        assertEquals("BRANCH", FieldId.BRANCH.name)
+        assertEquals("CURRENCY", FieldId.CURRENCY.name)
+        assertEquals("PAYPAL_EMAIL", FieldId.PAYPAL_EMAIL.name)
+        assertEquals("MERCHANT_ID", FieldId.MERCHANT_ID.name)
+        assertEquals("CUSTOMER_ID", FieldId.CUSTOMER_ID.name)
+        assertEquals("BENEFICIARY", FieldId.BENEFICIARY.name)
+        assertEquals("REFERENCE", FieldId.REFERENCE.name)
     }
 
     @Test

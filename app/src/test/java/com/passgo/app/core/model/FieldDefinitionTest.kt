@@ -212,6 +212,208 @@ class FieldDefinitionTest {
         }
     }
 
+    // ── CreditCardPin ─────────────────────────────────────────
+
+    @Nested
+    inner class CreditCardPinTest {
+
+        @ParameterizedTest
+        @ValueSource(strings = ["1234", "123456", "0000"])
+        fun `valid PIN passes validation`(pin: String) {
+            val result = FieldDefinition.CreditCardPin.validate(pin)
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = ["123", "1234567"])
+        fun `invalid PIN fails validation`(pin: String) {
+            val result = FieldDefinition.CreditCardPin.validate(pin)
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+
+        @Test
+        fun `empty PIN passes validation as optional`() {
+            val result = FieldDefinition.CreditCardPin.validate("")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+    }
+
+    // ── BankName ──────────────────────────────────────────────
+
+    @Nested
+    inner class BankNameTest {
+
+        @ParameterizedTest
+        @ValueSource(strings = ["Chase", "Bank of America", "Wells Fargo"])
+        fun `valid bank name passes validation`(name: String) {
+            val result = FieldDefinition.BankName.validate(name)
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank bank name fails validation`() {
+            val result = FieldDefinition.BankName.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── AccountHolder ─────────────────────────────────────────
+
+    @Nested
+    inner class AccountHolderTest {
+
+        @Test
+        fun `valid account holder passes validation`() {
+            val result = FieldDefinition.AccountHolder.validate("John Doe")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank account holder fails validation`() {
+            val result = FieldDefinition.AccountHolder.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── Currency ──────────────────────────────────────────────
+
+    @Nested
+    inner class CurrencyTest {
+
+        @ParameterizedTest
+        @ValueSource(strings = ["USD", "eur", "GBP"])
+        fun `valid currency passes validation`(currency: String) {
+            val result = FieldDefinition.Currency.validate(currency)
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = ["US", "USDD", "123", "$$$"])
+        fun `invalid currency fails validation`(currency: String) {
+            val result = FieldDefinition.Currency.validate(currency)
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+
+        @Test
+        fun `format uppercases currency`() {
+            assertEquals("USD", FieldDefinition.Currency.format("usd"))
+        }
+    }
+
+    // ── PayPalEmail ───────────────────────────────────────────
+
+    @Nested
+    inner class PayPalEmailTest {
+
+        @Test
+        fun `valid email passes validation`() {
+            val result = FieldDefinition.PayPalEmail.validate("user@paypal.com")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank email fails validation`() {
+            val result = FieldDefinition.PayPalEmail.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+
+        @Test
+        fun `email without at sign fails validation`() {
+            val result = FieldDefinition.PayPalEmail.validate("invalid")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── MerchantId ────────────────────────────────────────────
+
+    @Nested
+    inner class MerchantIdTest {
+
+        @Test
+        fun `valid merchant ID passes validation`() {
+            val result = FieldDefinition.MerchantId.validate("merchant_123")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank merchant ID fails validation`() {
+            val result = FieldDefinition.MerchantId.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── Beneficiary ───────────────────────────────────────────
+
+    @Nested
+    inner class BeneficiaryTest {
+
+        @Test
+        fun `valid beneficiary passes validation`() {
+            val result = FieldDefinition.Beneficiary.validate("Jane Smith")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `blank beneficiary fails validation`() {
+            val result = FieldDefinition.Beneficiary.validate("")
+            assertInstanceOf(FieldValidationResult.Invalid::class.java, result)
+        }
+    }
+
+    // ── Branch ─────────────────────────────────────────────────
+
+    @Nested
+    inner class BranchTest {
+
+        @Test
+        fun `valid branch passes validation`() {
+            val result = FieldDefinition.Branch.validate("Main Street")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `empty branch passes validation as optional`() {
+            val result = FieldDefinition.Branch.validate("")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+    }
+
+    // ── CustomerId ────────────────────────────────────────────
+
+    @Nested
+    inner class CustomerIdTest {
+
+        @Test
+        fun `valid customer ID passes validation`() {
+            val result = FieldDefinition.CustomerId.validate("cus_abc123")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `empty customer ID passes validation as optional`() {
+            val result = FieldDefinition.CustomerId.validate("")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+    }
+
+    // ── Reference ─────────────────────────────────────────────
+
+    @Nested
+    inner class ReferenceTest {
+
+        @Test
+        fun `valid reference passes validation`() {
+            val result = FieldDefinition.Reference.validate("INV-2024-001")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+
+        @Test
+        fun `empty reference passes validation as optional`() {
+            val result = FieldDefinition.Reference.validate("")
+            assertInstanceOf(FieldValidationResult.Valid::class.java, result)
+        }
+    }
+
     // ── FieldDefinition.lookup ───────────────────────────────
 
     @Nested

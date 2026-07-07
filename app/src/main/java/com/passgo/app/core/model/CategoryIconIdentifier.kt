@@ -12,5 +12,11 @@ enum class CategoryIconIdentifier {
     WIFI,
     SOFTWARE_LICENSE,
     SECURE_NOTE,
+    CREDIT_CARD,
+    DEBIT_CARD,
+    BANK_ACCOUNT,
+    PAYPAL,
+    WISE,
+    STRIPE,
     OTHER
 }

@@ -2,7 +2,7 @@
 
 A professional Android password manager with encrypted local storage.
 
-> **Status:** Milestone 4C — Dynamic Vault Type Engine (Complete)
+> **Status:** Milestone 4D.1 — Financial Vault Templates (Complete)
 > **Target:** Android 16 (API 36), APK distribution
 
 ## Architecture
@@ -95,5 +95,6 @@ Feature-first, single-module Android app built with:
 | M4A | Vault Organization (folders, tags, favorites, archive, trash, collections) | ✅ Complete |
 | M4B | Architecture Refinements (FieldId, FieldDefinition, custom_fields, unified search) | ✅ Complete |
 | M4C | Dynamic Vault Type Engine (auto-generated screens, metadata-driven) | ✅ Complete |
+| M4D.1 | Financial Vault Templates (Credit Card, Debit Card, Bank Account, PayPal, Wise, Stripe) | ✅ Complete |
 | M4D | Advanced Search & Attachments (full-text, files, preview) | ⏳ Pending |
 | M5 | Security + Polish (clipboard, audit, accessibility) | ⏳ Pending |
