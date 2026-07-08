@@ -4,8 +4,10 @@ import android.content.Context
 import com.passgo.app.core.logging.PassGoLogger
 import com.passgo.app.core.security.AttachmentManager
 import com.passgo.app.core.security.KeyStoreManager
+import com.passgo.app.core.security.MasterKeyManager
 import com.passgo.app.core.security.MasterPasswordStore
 import com.passgo.app.data.session.SessionManager
+import com.passgo.app.data.settings.FailedAttemptStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,9 +29,12 @@ object AppModule {
     @Singleton
     fun provideSessionManager(
         logger: PassGoLogger,
-        passwordStore: MasterPasswordStore
+        passwordStore: MasterPasswordStore,
+        failedAttemptStore: FailedAttemptStore,
+        masterKeyManager: MasterKeyManager,
+        keyStoreManager: KeyStoreManager
     ): SessionManager {
-        return SessionManager(logger, passwordStore)
+        return SessionManager(logger, passwordStore, failedAttemptStore, masterKeyManager, keyStoreManager)
     }
 
     @Provides

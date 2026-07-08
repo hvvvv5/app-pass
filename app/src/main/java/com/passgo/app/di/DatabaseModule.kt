@@ -72,7 +72,8 @@ abstract class DatabaseModule {
             masterKeyManager: MasterKeyManager
         ): PassGoDatabase {
             val masterKey = masterKeyManager.getOrCreateMasterKey()
-            return PassGoDatabase.build(context, masterKey)
+            val dbPassphrase = masterKey.copyOf()
+            return PassGoDatabase.build(context, dbPassphrase)
         }
 
         @Provides

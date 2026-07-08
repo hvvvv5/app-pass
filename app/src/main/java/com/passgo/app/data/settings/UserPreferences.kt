@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.passgo.app.core.logging.PassGoLogger
@@ -66,11 +67,34 @@ class UserPreferences @Inject constructor(
         }
     }
 
+    val clipboardClearEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[CLIPBOARD_CLEAR_KEY] ?: true
+    }
+
+    val clipboardClearDelayMs: Flow<Long> = context.dataStore.data.map { prefs ->
+        prefs[CLIPBOARD_DELAY_KEY] ?: DEFAULT_CLIPBOARD_DELAY_MS
+    }
+
+    suspend fun setClipboardClearEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[CLIPBOARD_CLEAR_KEY] = enabled
+        }
+    }
+
+    suspend fun setClipboardClearDelayMs(delayMs: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[CLIPBOARD_DELAY_KEY] = delayMs
+        }
+    }
+
     companion object {
         private val THEME_KEY = stringPreferencesKey("theme_mode")
         private val AUTO_LOCK_KEY = intPreferencesKey("auto_lock_seconds")
         private val LANGUAGE_KEY = stringPreferencesKey("language_code")
         private val SECURITY_TIPS_KEY = booleanPreferencesKey("security_tips_enabled")
+        private val CLIPBOARD_CLEAR_KEY = booleanPreferencesKey("clipboard_clear_enabled")
+        private val CLIPBOARD_DELAY_KEY = longPreferencesKey("clipboard_clear_delay_ms")
         private const val DEFAULT_AUTO_LOCK_SECONDS = 300
+        private const val DEFAULT_CLIPBOARD_DELAY_MS = 30000L
     }
 }

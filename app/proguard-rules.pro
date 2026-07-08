@@ -23,3 +23,9 @@
 -keepclasseswithmembers class com.passgo.app.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
+
+# Keep AndroidX Security Crypto (EncryptedSharedPreferences)
+-keep class androidx.security.crypto.** { *; }
+
+# Keep SQLCipher classes used via reflection in Room
+-keep class net.zetetic.database.sqlcipher.** { *; }

@@ -161,4 +161,118 @@ interface VaultItemDao {
         AND vi.folder_id = :folderId
     """)
     fun searchByFolderFts(vaultId: String, folderId: String, query: String): Flow<List<VaultItemEntity>>
+
+    // Paginated variants
+    @Query("SELECT * FROM vault_items WHERE vault_id = :vaultId AND deleted_at IS NULL AND archived_at IS NULL ORDER BY updated_at DESC LIMIT :limit OFFSET :offset")
+    fun getActiveItemsPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("SELECT * FROM vault_items WHERE vault_id = :vaultId AND deleted_at IS NULL AND archived_at IS NULL AND type = :type ORDER BY updated_at DESC LIMIT :limit OFFSET :offset")
+    fun getByTypePaged(vaultId: String, type: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("SELECT * FROM vault_items WHERE deleted_at IS NULL AND archived_at IS NULL AND folder_id = :folderId ORDER BY updated_at DESC LIMIT :limit OFFSET :offset")
+    fun getByFolderPaged(folderId: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("SELECT * FROM vault_items WHERE vault_id = :vaultId AND deleted_at IS NULL AND archived_at IS NULL AND favorite = 1 ORDER BY updated_at DESC LIMIT :limit OFFSET :offset")
+    fun getFavoritesPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("SELECT * FROM vault_items WHERE vault_id = :vaultId AND archived_at IS NOT NULL AND deleted_at IS NULL ORDER BY archived_at DESC LIMIT :limit OFFSET :offset")
+    fun getArchivedItemsPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("SELECT * FROM vault_items WHERE vault_id = :vaultId AND deleted_at IS NOT NULL ORDER BY deleted_at DESC LIMIT :limit OFFSET :offset")
+    fun getDeletedPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT DISTINCT vi.* FROM vault_items vi
+        LEFT JOIN custom_fields cf ON vi.id = cf.item_id
+        WHERE vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL 
+        AND (vi.name LIKE '%' || :query || '%' OR vi.username LIKE '%' || :query || '%' OR vi.email LIKE '%' || :query || '%' OR vi.url LIKE '%' || :query || '%' OR vi.notes LIKE '%' || :query || '%' OR cf.field_value LIKE '%' || :query || '%')
+        ORDER BY vi.updated_at DESC LIMIT :limit OFFSET :offset
+    """)
+    fun searchItemsPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT DISTINCT vi.* FROM vault_items vi
+        LEFT JOIN custom_fields cf ON vi.id = cf.item_id
+        WHERE vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL AND vi.type = :type
+        AND (vi.name LIKE '%' || :query || '%' OR vi.username LIKE '%' || :query || '%' OR vi.email LIKE '%' || :query || '%' OR vi.url LIKE '%' || :query || '%' OR vi.notes LIKE '%' || :query || '%' OR cf.field_value LIKE '%' || :query || '%')
+        ORDER BY vi.updated_at DESC LIMIT :limit OFFSET :offset
+    """)
+    fun searchByTypePaged(vaultId: String, type: String, query: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT DISTINCT vi.* FROM vault_items vi
+        LEFT JOIN custom_fields cf ON vi.id = cf.item_id
+        WHERE vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL AND vi.favorite = 1
+        AND (vi.name LIKE '%' || :query || '%' OR vi.username LIKE '%' || :query || '%' OR vi.email LIKE '%' || :query || '%' OR vi.url LIKE '%' || :query || '%' OR vi.notes LIKE '%' || :query || '%' OR cf.field_value LIKE '%' || :query || '%')
+        ORDER BY vi.updated_at DESC LIMIT :limit OFFSET :offset
+    """)
+    fun searchFavoritesPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT DISTINCT vi.* FROM vault_items vi
+        LEFT JOIN custom_fields cf ON vi.id = cf.item_id
+        WHERE vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL AND vi.folder_id = :folderId
+        AND (vi.name LIKE '%' || :query || '%' OR vi.username LIKE '%' || :query || '%' OR vi.email LIKE '%' || :query || '%' OR vi.url LIKE '%' || :query || '%' OR vi.notes LIKE '%' || :query || '%' OR cf.field_value LIKE '%' || :query || '%')
+        ORDER BY vi.updated_at DESC LIMIT :limit OFFSET :offset
+    """)
+    fun searchByFolderPaged(vaultId: String, folderId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("SELECT * FROM vault_items WHERE vault_id = :vaultId AND deleted_at IS NULL AND archived_at IS NULL ORDER BY name ASC LIMIT :limit OFFSET :offset")
+    fun getActiveItemsSortedByNamePaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("SELECT * FROM vault_items WHERE vault_id = :vaultId AND deleted_at IS NULL AND archived_at IS NULL ORDER BY created_at DESC LIMIT :limit OFFSET :offset")
+    fun getActiveItemsSortedByNewestPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("SELECT * FROM vault_items WHERE vault_id = :vaultId AND deleted_at IS NULL AND archived_at IS NULL ORDER BY favorite DESC, updated_at DESC LIMIT :limit OFFSET :offset")
+    fun getActiveItemsSortedByFavoritePaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("SELECT * FROM vault_items WHERE vault_id = :vaultId AND deleted_at IS NULL AND archived_at IS NULL ORDER BY updated_at DESC LIMIT :limit OFFSET :offset")
+    fun getRecentItemsPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT vi.* FROM vault_items vi
+        INNER JOIN tag_item ti ON vi.id = ti.item_id
+        WHERE vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL
+        AND ti.tag_id IN (:tagIds)
+        GROUP BY vi.id
+        HAVING COUNT(DISTINCT ti.tag_id) = :tagCount
+        ORDER BY vi.updated_at DESC LIMIT :limit OFFSET :offset
+    """)
+    fun getItemsByTagsPaged(vaultId: String, tagIds: List<String>, tagCount: Int, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT vi.* FROM vault_items vi
+        INNER JOIN items_fts fts ON vi.id = fts.item_id
+        WHERE items_fts MATCH :query
+        AND vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL
+        LIMIT :limit OFFSET :offset
+    """)
+    fun searchItemsFtsPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT vi.* FROM vault_items vi
+        INNER JOIN items_fts fts ON vi.id = fts.item_id
+        WHERE items_fts MATCH :query
+        AND vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL
+        AND vi.type = :type LIMIT :limit OFFSET :offset
+    """)
+    fun searchByTypeFtsPaged(vaultId: String, type: String, query: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT vi.* FROM vault_items vi
+        INNER JOIN items_fts fts ON vi.id = fts.item_id
+        WHERE items_fts MATCH :query
+        AND vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL
+        AND vi.favorite = 1 LIMIT :limit OFFSET :offset
+    """)
+    fun searchFavoritesFtsPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
+
+    @Query("""
+        SELECT vi.* FROM vault_items vi
+        INNER JOIN items_fts fts ON vi.id = fts.item_id
+        WHERE items_fts MATCH :query
+        AND vi.vault_id = :vaultId AND vi.deleted_at IS NULL AND vi.archived_at IS NULL
+        AND vi.folder_id = :folderId LIMIT :limit OFFSET :offset
+    """)
+    fun searchByFolderFtsPaged(vaultId: String, folderId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItemEntity>>
 }

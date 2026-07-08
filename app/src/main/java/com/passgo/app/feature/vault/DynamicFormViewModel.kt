@@ -167,7 +167,8 @@ class DynamicFormViewModel @Inject constructor(
                 excludeAmbiguous = true
             )
         )
-        setFieldValue(FieldId.PASSWORD, generated)
+        setFieldValue(FieldId.PASSWORD, String(generated))
+        passwordGenerator.wipePassword(generated)
         logger.info("DynamicFormViewModel", "Password generated")
     }
 

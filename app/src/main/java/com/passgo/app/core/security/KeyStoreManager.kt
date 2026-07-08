@@ -89,6 +89,10 @@ class KeyStoreManager @Inject constructor() {
         return cipher.doFinal(encryptedData.data)
     }
 
+    fun clearCache() {
+        encryptedKeyCache = null
+    }
+
     fun deleteKey(alias: String = KEY_ALIAS) {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null)

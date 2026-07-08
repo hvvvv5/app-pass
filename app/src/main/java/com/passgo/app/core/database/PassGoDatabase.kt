@@ -36,7 +36,7 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         ItemsFtsEntity::class,
         SearchHistoryEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = true
 )
 abstract class PassGoDatabase : RoomDatabase() {
@@ -59,6 +59,7 @@ abstract class PassGoDatabase : RoomDatabase() {
                     val sqlCipherFactory = SupportOpenHelperFactory(passphrase)
                     val helper = sqlCipherFactory.create(configuration)
                     helper.writableDatabase.execSQL(SQLCIPHER_OPTIONS)
+                    passphrase.fill(0)
                     return helper
                 }
             }
@@ -73,14 +74,18 @@ abstract class PassGoDatabase : RoomDatabase() {
                 .build()
         }
 
+
+
         fun buildInMemory(context: Context, passphrase: ByteArray): PassGoDatabase {
             val factory = SupportOpenHelperFactory(passphrase)
-            return Room.inMemoryDatabaseBuilder(
+            val db = Room.inMemoryDatabaseBuilder(
                 context.applicationContext,
                 PassGoDatabase::class.java
             )
                 .openHelperFactory(factory)
                 .build()
+            passphrase.fill(0)
+            return db
         }
     }
 }

@@ -13,12 +13,17 @@ import com.passgo.app.data.repository.TagRepository
 import com.passgo.app.data.repository.VaultItemRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -37,7 +42,7 @@ sealed class VaultCollection {
     data class FolderRef(val folder: Folder) : VaultCollection()
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
 class VaultViewModel @Inject constructor(
     private val vaultItemRepository: VaultItemRepository,
@@ -48,8 +53,14 @@ class VaultViewModel @Inject constructor(
 
     private val vaultId = "default"
 
+    companion object {
+        private const val PAGE_SIZE = 20
+    }
+
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _debouncedSearchQuery = MutableStateFlow("")
 
     private val _sortOption = MutableStateFlow(SortOption.RECENT)
     val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
@@ -59,6 +70,18 @@ class VaultViewModel @Inject constructor(
 
     private val _selectedTagIds = MutableStateFlow<Set<String>>(emptySet())
     val selectedTagIds: StateFlow<Set<String>> = _selectedTagIds.asStateFlow()
+
+    // Pagination state
+    private val _paginatedItems = MutableStateFlow<List<VaultItem>>(emptyList())
+    val paginatedItems: StateFlow<List<VaultItem>> = _paginatedItems.asStateFlow()
+
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+
+    private val _hasMore = MutableStateFlow(true)
+    val hasMore: StateFlow<Boolean> = _hasMore.asStateFlow()
+
+    private var currentPage = 0
 
     val folders: StateFlow<List<Folder>> = folderRepository.getActiveFolders(vaultId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -81,8 +104,26 @@ class VaultViewModel @Inject constructor(
     private val _showDeleteTagDialog = MutableStateFlow<Tag?>(null)
     val showDeleteTagDialog: StateFlow<Tag?> = _showDeleteTagDialog.asStateFlow()
 
+    init {
+        _debouncedSearchQuery.value = _searchQuery.value
+        viewModelScope.launch {
+            _searchQuery
+                .debounce(300)
+                .distinctUntilChanged()
+                .collect { _debouncedSearchQuery.value = it }
+        }
+        viewModelScope.launch {
+            combine(_debouncedSearchQuery, _selectedCollection, _selectedTagIds, _sortOption) { _, _, _, _ -> }
+                .collect {
+                    _paginatedItems.value = emptyList()
+                    currentPage = 0
+                    _hasMore.value = true
+                }
+        }
+    }
+
     val items: StateFlow<List<VaultItem>> = combine(
-        _searchQuery, _selectedCollection, _selectedTagIds, _sortOption
+        _debouncedSearchQuery, _selectedCollection, _selectedTagIds, _sortOption
     ) { query, collection, tagIds, sort ->
         Triple(query, collection, tagIds)
     }.flatMapLatest { (query, collection, tagIds) ->
@@ -146,6 +187,66 @@ class VaultViewModel @Inject constructor(
         _selectedTagIds.value = emptySet()
         _searchQuery.value = ""
         _sortOption.value = SortOption.RECENT
+    }
+
+    fun loadMoreItems() {
+        if (_isLoadingMore.value || !_hasMore.value) return
+        _isLoadingMore.value = true
+        viewModelScope.launch {
+            val offset = (currentPage) * PAGE_SIZE
+            val query = _debouncedSearchQuery.value
+            val collection = _selectedCollection.value
+            val tagIds = _selectedTagIds.value
+            val flow: Flow<List<VaultItem>> = when (collection) {
+                is VaultCollection.AllItems -> {
+                    when {
+                        query.isNotBlank() -> vaultItemRepository.searchItemsPaged(vaultId, query, PAGE_SIZE, offset)
+                        else -> when (_sortOption.value) {
+                            SortOption.NAME -> vaultItemRepository.getActiveItemsSortedByNamePaged(vaultId, PAGE_SIZE, offset)
+                            SortOption.FAVORITE -> vaultItemRepository.getActiveItemsSortedByFavoritePaged(vaultId, PAGE_SIZE, offset)
+                            SortOption.RECENT -> vaultItemRepository.getActiveItemsPaged(vaultId, PAGE_SIZE, offset)
+                        }
+                    }
+                }
+                is VaultCollection.Recent -> vaultItemRepository.getRecentItemsPaged(vaultId, PAGE_SIZE, offset)
+                is VaultCollection.Favorites -> {
+                    if (query.isNotBlank()) {
+                        vaultItemRepository.searchFavoritesPaged(vaultId, query, PAGE_SIZE, offset)
+                    } else {
+                        vaultItemRepository.getFavoritesPaged(vaultId, PAGE_SIZE, offset)
+                    }
+                }
+                is VaultCollection.Archived -> vaultItemRepository.getArchivedItemsPaged(vaultId, PAGE_SIZE, offset)
+                is VaultCollection.Trash -> vaultItemRepository.getDeletedPaged(vaultId, PAGE_SIZE, offset)
+                is VaultCollection.Category -> {
+                    if (query.isNotBlank()) {
+                        vaultItemRepository.searchByTypePaged(vaultId, collection.category, query, PAGE_SIZE, offset)
+                    } else {
+                        vaultItemRepository.getByTypePaged(vaultId, collection.category, PAGE_SIZE, offset)
+                    }
+                }
+                is VaultCollection.FolderRef -> {
+                    if (query.isNotBlank()) {
+                        vaultItemRepository.searchByFolderPaged(vaultId, collection.folder.id, query, PAGE_SIZE, offset)
+                    } else {
+                        vaultItemRepository.getByFolderPaged(collection.folder.id, PAGE_SIZE, offset)
+                    }
+                }
+            }
+            val resultFlow: Flow<List<VaultItem>> = if (tagIds.isNotEmpty()) {
+                combine(flow, vaultItemRepository.getItemsByTags(vaultId, tagIds.toList())) { pageItems, taggedItems ->
+                    val taggedIds = taggedItems.map { it.id }.toSet()
+                    pageItems.filter { it.id in taggedIds }
+                }
+            } else {
+                flow
+            }
+            val page = resultFlow.first()
+            _paginatedItems.value = _paginatedItems.value + page
+            currentPage++
+            _hasMore.value = page.size == PAGE_SIZE
+            _isLoadingMore.value = false
+        }
     }
 
     fun toggleFavorite(item: VaultItem) {

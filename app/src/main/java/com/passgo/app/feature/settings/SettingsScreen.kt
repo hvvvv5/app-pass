@@ -19,6 +19,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,6 +36,8 @@ fun SettingsScreen(
 ) {
     val themeMode by viewModel.themeMode.collectAsState()
     val autoLockSeconds by viewModel.autoLockSeconds.collectAsState()
+    val clipboardClearEnabled by viewModel.clipboardClearEnabled.collectAsState()
+    val clipboardClearDelayMs by viewModel.clipboardClearDelayMs.collectAsState()
 
     Column(
         modifier = Modifier
@@ -65,6 +68,15 @@ fun SettingsScreen(
         AutoLockSection(
             currentSeconds = autoLockSeconds,
             onSecondsSelected = viewModel::setAutoLockSeconds
+        )
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        ClipboardSection(
+            enabled = clipboardClearEnabled,
+            delayMs = clipboardClearDelayMs,
+            onEnabledChanged = viewModel::setClipboardClearEnabled,
+            onDelayMsSelected = viewModel::setClipboardClearDelayMs
         )
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -180,6 +192,71 @@ private fun AutoLockSection(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(start = 8.dp)
             )
+        }
+    }
+}
+
+@Composable
+private fun ClipboardSection(
+    enabled: Boolean,
+    delayMs: Long,
+    onEnabledChanged: (Boolean) -> Unit,
+    onDelayMsSelected: (Long) -> Unit
+) {
+    Text(
+        "Clipboard",
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Auto-Clear Copied Passwords",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
+        Switch(
+            checked = enabled,
+            onCheckedChange = onEnabledChanged
+        )
+    }
+
+    if (enabled) {
+        Text(
+            "Clear after:",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+        )
+
+        val options = listOf(
+            15000L to "15 seconds",
+            30000L to "30 seconds",
+            60000L to "60 seconds"
+        )
+
+        options.forEach { (ms, label) ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onDelayMsSelected(ms) }
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = delayMs == ms,
+                    onClick = { onDelayMsSelected(ms) }
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
         }
     }
 }

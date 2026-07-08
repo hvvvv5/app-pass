@@ -35,6 +35,7 @@ fun UnlockScreen(
 ) {
     val password by viewModel.password.collectAsState()
     val error by viewModel.error.collectAsState()
+    val lockoutSecondsRemaining by viewModel.lockoutSecondsRemaining.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.isUnlocked.collect { success ->
@@ -100,7 +101,7 @@ fun UnlockScreen(
 
         Button(
             onClick = viewModel::unlock,
-            enabled = password.isNotEmpty(),
+            enabled = password.isNotEmpty() && lockoutSecondsRemaining <= 0,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Unlock")

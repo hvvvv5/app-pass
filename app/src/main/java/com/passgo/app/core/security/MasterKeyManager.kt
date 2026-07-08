@@ -81,6 +81,10 @@ class MasterKeyManager @Inject constructor(
         cachedMasterKey = null
     }
 
+    fun clearOnLock() {
+        clearCache()
+    }
+
     data class MasterKeyResult(
         val encryptedDbKey: KeyStoreManager.EncryptedData,
         val derivedKey: ByteArray,

@@ -47,4 +47,22 @@ class SettingsViewModel @Inject constructor(
             userPreferences.setAutoLockSeconds(seconds)
         }
     }
+
+    val clipboardClearEnabled: StateFlow<Boolean> = userPreferences.clipboardClearEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val clipboardClearDelayMs: StateFlow<Long> = userPreferences.clipboardClearDelayMs
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 30000L)
+
+    fun setClipboardClearEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setClipboardClearEnabled(enabled)
+        }
+    }
+
+    fun setClipboardClearDelayMs(delayMs: Long) {
+        viewModelScope.launch {
+            userPreferences.setClipboardClearDelayMs(delayMs)
+        }
+    }
 }

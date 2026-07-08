@@ -146,4 +146,62 @@ class VaultItemRepositoryImpl @Inject constructor(
 
     override fun searchByFolderFts(vaultId: String, folderId: String, query: String): Flow<List<VaultItem>> =
         vaultItemDao.searchByFolderFts(vaultId, folderId, query).map { list -> list.map { it.toDomain() } }
+
+    // Paginated variants
+    override fun getActiveItemsPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.getActiveItemsPaged(vaultId, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun getByTypePaged(vaultId: String, category: VaultItemCategory, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.getByTypePaged(vaultId, category.name, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun getByFolderPaged(folderId: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.getByFolderPaged(folderId, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun getFavoritesPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.getFavoritesPaged(vaultId, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun getArchivedItemsPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.getArchivedItemsPaged(vaultId, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun getDeletedPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.getDeletedPaged(vaultId, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun searchItemsPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.searchItemsPaged(vaultId, query, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun searchByTypePaged(vaultId: String, type: VaultItemCategory, query: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.searchByTypePaged(vaultId, type.name, query, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun searchFavoritesPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.searchFavoritesPaged(vaultId, query, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun searchByFolderPaged(vaultId: String, folderId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.searchByFolderPaged(vaultId, folderId, query, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun getActiveItemsSortedByNamePaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.getActiveItemsSortedByNamePaged(vaultId, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun getActiveItemsSortedByNewestPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.getActiveItemsSortedByNewestPaged(vaultId, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun getActiveItemsSortedByFavoritePaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.getActiveItemsSortedByFavoritePaged(vaultId, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun getRecentItemsPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.getRecentItemsPaged(vaultId, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun getItemsByTagsPaged(vaultId: String, tagIds: List<String>, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.getItemsByTagsPaged(vaultId, tagIds, tagIds.size, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun searchItemsFtsPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.searchItemsFtsPaged(vaultId, query, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun searchByTypeFtsPaged(vaultId: String, type: VaultItemCategory, query: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.searchByTypeFtsPaged(vaultId, type.name, query, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun searchFavoritesFtsPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.searchFavoritesFtsPaged(vaultId, query, limit, offset).map { list -> list.map { it.toDomain() } }
+
+    override fun searchByFolderFtsPaged(vaultId: String, folderId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>> =
+        vaultItemDao.searchByFolderFtsPaged(vaultId, folderId, query, limit, offset).map { list -> list.map { it.toDomain() } }
 }

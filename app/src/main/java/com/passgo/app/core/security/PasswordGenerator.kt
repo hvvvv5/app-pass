@@ -18,7 +18,7 @@ class PasswordGenerator @Inject constructor() {
         val excludeAmbiguous: Boolean = false
     )
 
-    fun generate(options: GeneratorOptions): String {
+    fun generate(options: GeneratorOptions): CharArray {
         val uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         val lowercase = "abcdefghijklmnopqrstuvwxyz"
         val digits = "0123456789"
@@ -40,15 +40,17 @@ class PasswordGenerator @Inject constructor() {
             chars.clear(); chars.append(filtered)
         }
 
-        if (chars.isEmpty()) return ""
+        if (chars.isEmpty()) return CharArray(0)
 
         val password = CharArray(options.length)
         for (i in 0 until options.length) {
             password[i] = chars[secureRandom.nextInt(chars.length)]
         }
 
-        val result = String(password)
+        return password
+    }
+
+    fun wipePassword(password: CharArray) {
         password.fill('\u0000')
-        return result
     }
 }

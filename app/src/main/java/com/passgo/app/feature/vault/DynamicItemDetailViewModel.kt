@@ -1,7 +1,5 @@
 package com.passgo.app.feature.vault
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -9,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.passgo.app.core.error.AppResult
 import com.passgo.app.core.logging.PassGoLogger
+import com.passgo.app.core.security.ClipboardGuard
 import com.passgo.app.core.model.CustomField
 import com.passgo.app.core.model.FieldDefinition
 import com.passgo.app.core.model.FieldId
@@ -44,6 +43,7 @@ class DynamicItemDetailViewModel @Inject constructor(
     private val tagRepository: TagRepository,
     private val folderRepository: FolderRepository,
     private val logger: PassGoLogger,
+    private val clipboardGuard: ClipboardGuard,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -125,8 +125,7 @@ class DynamicItemDetailViewModel @Inject constructor(
     }
 
     fun copyToClipboard(label: String, text: String) {
-        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(ClipData.newPlainText(label, text))
+        clipboardGuard.copySensitiveText(text)
         _copyFeedback.value = "$label copied"
         logger.info("DynamicItemDetailViewModel", "Field copied  to clipboard")
     }

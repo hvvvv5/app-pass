@@ -27,7 +27,9 @@ class KeyDerivation @Inject constructor() {
     fun deriveKey(password: CharArray, salt: ByteArray): ByteArray {
         val spec = PBEKeySpec(password, salt, ITERATIONS, KEY_LENGTH_BITS)
         val factory = SecretKeyFactory.getInstance(ALGORITHM)
-        return factory.generateSecret(spec).encoded
+        val secretKey = factory.generateSecret(spec)
+        spec.clearPassword()
+        return secretKey.encoded
     }
 
     fun clearPassword(password: CharArray) {

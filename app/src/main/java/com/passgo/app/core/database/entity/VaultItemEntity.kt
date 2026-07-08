@@ -27,7 +27,9 @@ import androidx.room.PrimaryKey
         Index(value = ["folder_id"]),
         Index(value = ["type"]),
         Index(value = ["deleted_at"]),
-        Index(value = ["archived_at"])
+        Index(value = ["archived_at"]),
+        Index(value = ["favorite"]),
+        Index(value = ["vault_id", "deleted_at", "archived_at"])
     ]
 )
 data class VaultItemEntity(
