@@ -36,7 +36,7 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         ItemsFtsEntity::class,
         SearchHistoryEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = true
 )
 abstract class PassGoDatabase : RoomDatabase() {

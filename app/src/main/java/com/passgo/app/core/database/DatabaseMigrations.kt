@@ -100,5 +100,10 @@ object DatabaseMigrations {
         db.execSQL("ALTER TABLE attachments ADD COLUMN content_hash TEXT NOT NULL DEFAULT ''")
     }
 
-    val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+    val MIGRATION_7_8 = Migration(7, 8) { db ->
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_vault_items_favorite ON vault_items(favorite)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_vault_items_vault_deleted_archived ON vault_items(vault_id, deleted_at, archived_at)")
+    }
+
+    val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
 }

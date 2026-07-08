@@ -24,7 +24,7 @@ class DatabaseMigrationTest {
     @Test
     fun `all migrations are registered in order`() {
         val migrations = DatabaseMigrations.ALL_MIGRATIONS
-        assertEquals(6, migrations.size)
+        assertEquals(7, migrations.size)
         assertEquals(1, migrations[0].startVersion)
         assertEquals(2, migrations[0].endVersion)
         assertEquals(2, migrations[1].startVersion)
@@ -79,5 +79,17 @@ class DatabaseMigrationTest {
     @Test
     fun `MIGRATION_6_7 SQL is non-empty`() {
         assertNotNull(DatabaseMigrations.MIGRATION_6_7)
+    }
+
+    @Test
+    fun `MIGRATION_7_8 creates database indexes`() {
+        val migration = DatabaseMigrations.MIGRATION_7_8
+        assertEquals(7, migration.startVersion)
+        assertEquals(8, migration.endVersion)
+    }
+
+    @Test
+    fun `MIGRATION_7_8 SQL is non-empty`() {
+        assertNotNull(DatabaseMigrations.MIGRATION_7_8)
     }
 }

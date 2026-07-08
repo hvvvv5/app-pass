@@ -37,4 +37,25 @@ interface VaultItemRepository {
     fun searchByTypeFts(vaultId: String, type: VaultItemCategory, query: String): Flow<List<VaultItem>>
     fun searchFavoritesFts(vaultId: String, query: String): Flow<List<VaultItem>>
     fun searchByFolderFts(vaultId: String, folderId: String, query: String): Flow<List<VaultItem>>
+
+    // Paginated variants
+    fun getActiveItemsPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun getByTypePaged(vaultId: String, category: VaultItemCategory, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun getByFolderPaged(folderId: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun getFavoritesPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun getArchivedItemsPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun getDeletedPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun searchItemsPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun searchByTypePaged(vaultId: String, type: VaultItemCategory, query: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun searchFavoritesPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun searchByFolderPaged(vaultId: String, folderId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun getActiveItemsSortedByNamePaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun getActiveItemsSortedByNewestPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun getActiveItemsSortedByFavoritePaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun getRecentItemsPaged(vaultId: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun getItemsByTagsPaged(vaultId: String, tagIds: List<String>, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun searchItemsFtsPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun searchByTypeFtsPaged(vaultId: String, type: VaultItemCategory, query: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun searchFavoritesFtsPaged(vaultId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>>
+    fun searchByFolderFtsPaged(vaultId: String, folderId: String, query: String, limit: Int, offset: Int): Flow<List<VaultItem>>
 }
