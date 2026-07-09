@@ -5,6 +5,7 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class PassGoApplication : Application() {
+
     override fun onCreate() {
         super.onCreate()
     }

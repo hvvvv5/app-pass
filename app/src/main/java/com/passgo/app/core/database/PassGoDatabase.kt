@@ -53,6 +53,59 @@ abstract class PassGoDatabase : RoomDatabase() {
         private const val DB_NAME = "passgo_vault.db"
         private const val SQLCIPHER_OPTIONS = "PRAGMA cipher_compatibility = 4"
 
+        val ftsCallback = object : Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                createFtsTriggers(db)
+            }
+        }
+
+        fun createFtsTriggers(db: SupportSQLiteDatabase) {
+            db.execSQL("""
+                CREATE TRIGGER IF NOT EXISTS items_fts_insert AFTER INSERT ON vault_items BEGIN
+                    INSERT INTO items_fts(item_id, name, username, email, url, notes, custom_values)
+                    VALUES (new.id, new.name, new.username, new.email, new.url, new.notes, '');
+                END
+            """)
+
+            db.execSQL("""
+                CREATE TRIGGER IF NOT EXISTS items_fts_delete AFTER DELETE ON vault_items BEGIN
+                    DELETE FROM items_fts WHERE item_id = old.id;
+                END
+            """)
+
+            db.execSQL("""
+                CREATE TRIGGER IF NOT EXISTS items_fts_update AFTER UPDATE ON vault_items BEGIN
+                    DELETE FROM items_fts WHERE item_id = old.id;
+                    INSERT INTO items_fts(item_id, name, username, email, url, notes, custom_values)
+                    VALUES (new.id, new.name, new.username, new.email, new.url, new.notes, '');
+                END
+            """)
+
+            db.execSQL("""
+                CREATE TRIGGER IF NOT EXISTS items_fts_cf_insert AFTER INSERT ON custom_fields BEGIN
+                    UPDATE items_fts SET custom_values = (
+                        SELECT COALESCE(group_concat(field_value, ' '), '') FROM custom_fields WHERE item_id = new.item_id
+                    ) WHERE item_id = new.item_id;
+                END
+            """)
+
+            db.execSQL("""
+                CREATE TRIGGER IF NOT EXISTS items_fts_cf_delete AFTER DELETE ON custom_fields BEGIN
+                    UPDATE items_fts SET custom_values = (
+                        SELECT COALESCE(group_concat(field_value, ' '), '') FROM custom_fields WHERE item_id = old.item_id
+                    ) WHERE item_id = old.item_id;
+                END
+            """)
+
+            db.execSQL("""
+                CREATE TRIGGER IF NOT EXISTS items_fts_cf_update AFTER UPDATE ON custom_fields BEGIN
+                    UPDATE items_fts SET custom_values = (
+                        SELECT COALESCE(group_concat(field_value, ' '), '') FROM custom_fields WHERE item_id = new.item_id
+                    ) WHERE item_id = new.item_id;
+                END
+            """)
+        }
+
         fun build(context: Context, passphrase: ByteArray): PassGoDatabase {
             val factory = object : SupportSQLiteOpenHelper.Factory {
                 override fun create(configuration: SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper {
@@ -71,6 +124,7 @@ abstract class PassGoDatabase : RoomDatabase() {
             )
                 .openHelperFactory(factory)
                 .addMigrations(*DatabaseMigrations.ALL_MIGRATIONS)
+                .addCallback(ftsCallback)
                 .build()
         }
 
@@ -83,6 +137,7 @@ abstract class PassGoDatabase : RoomDatabase() {
                 PassGoDatabase::class.java
             )
                 .openHelperFactory(factory)
+                .addCallback(ftsCallback)
                 .build()
             passphrase.fill(0)
             return db

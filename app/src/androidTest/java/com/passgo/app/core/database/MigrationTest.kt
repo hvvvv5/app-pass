@@ -6,6 +6,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.passgo.app.core.BaseInstrumentedTest
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import org.junit.After
 import org.junit.Assert.assertTrue
@@ -14,7 +15,7 @@ import org.junit.runner.RunWith
 import java.security.SecureRandom
 
 @RunWith(AndroidJUnit4::class)
-class MigrationTest {
+class MigrationTest : BaseInstrumentedTest() {
 
     private val passphrase = ByteArray(32).apply { SecureRandom().nextBytes(this) }
     private val factory = SupportOpenHelperFactory(passphrase)
@@ -70,6 +71,7 @@ class MigrationTest {
             "migration_test.db"
         )
             .openHelperFactory(factory)
+            .addCallback(PassGoDatabase.ftsCallback)
             .build()
 
         val database = db.openHelper.readableDatabase
@@ -95,6 +97,7 @@ class MigrationTest {
             "migration_test.db"
         )
             .openHelperFactory(factory)
+            .addCallback(PassGoDatabase.ftsCallback)
             .build()
 
         val version = db.openHelper.readableDatabase.version
@@ -112,6 +115,7 @@ class MigrationTest {
             "migration_test.db"
         )
             .openHelperFactory(factory)
+            .addCallback(PassGoDatabase.ftsCallback)
             .build()
 
         val database = db.openHelper.readableDatabase
@@ -141,12 +145,14 @@ class MigrationTest {
             "migration_test.db"
         )
             .openHelperFactory(factory)
+            .addCallback(PassGoDatabase.ftsCallback)
             .build()
 
         val database = db.openHelper.writableDatabase
 
-        database.execSQL("INSERT INTO vaults (id, name) VALUES ('v1', 'Test Vault')")
-        database.execSQL("INSERT INTO vault_items (id, vault_id, type, name, username, email, url, notes) VALUES ('i1', 'v1', 'LOGIN', 'GitHub', 'user', 'user@test.com', 'https://github.com', 'My notes')")
+        val now = System.currentTimeMillis()
+        database.execSQL("INSERT INTO vaults (id, name, description, created_at, updated_at, sync_version, sync_status) VALUES ('v1', 'Test Vault', '', $now, $now, 0, 'SYNCED')")
+        database.execSQL("INSERT INTO vault_items (id, vault_id, type, name, username, email, url, notes, password, favorite, created_at, updated_at, sync_version, sync_status) VALUES ('i1', 'v1', 'LOGIN', 'GitHub', 'user', 'user@test.com', 'https://github.com', 'My notes', '', 0, $now, $now, 0, 'SYNCED')")
 
         val cursor = queryRow(database, "SELECT item_id, name, username, email, url, notes FROM items_fts WHERE item_id = 'i1'")
         assertTrue("FTS row should exist after insert", cursor.moveToFirst())
@@ -166,12 +172,14 @@ class MigrationTest {
             "migration_test.db"
         )
             .openHelperFactory(factory)
+            .addCallback(PassGoDatabase.ftsCallback)
             .build()
 
         val database = db.openHelper.writableDatabase
 
-        database.execSQL("INSERT INTO vaults (id, name) VALUES ('v2', 'Test Vault')")
-        database.execSQL("INSERT INTO vault_items (id, vault_id, type, name) VALUES ('i2', 'v2', 'LOGIN', 'ToDelete')")
+        val now = System.currentTimeMillis()
+        database.execSQL("INSERT INTO vaults (id, name, description, created_at, updated_at, sync_version, sync_status) VALUES ('v2', 'Test Vault', '', $now, $now, 0, 'SYNCED')")
+        database.execSQL("INSERT INTO vault_items (id, vault_id, type, name, username, email, password, url, notes, favorite, created_at, updated_at, sync_version, sync_status) VALUES ('i2', 'v2', 'LOGIN', 'ToDelete', '', '', '', '', '', 0, $now, $now, 0, 'SYNCED')")
         database.execSQL("DELETE FROM vault_items WHERE id = 'i2'")
 
         val count = querySingleValue(database, "SELECT COUNT(*) FROM items_fts WHERE item_id = 'i2'")
@@ -189,12 +197,14 @@ class MigrationTest {
             "migration_test.db"
         )
             .openHelperFactory(factory)
+            .addCallback(PassGoDatabase.ftsCallback)
             .build()
 
         val database = db.openHelper.writableDatabase
 
-        database.execSQL("INSERT INTO vaults (id, name) VALUES ('v3', 'Test Vault')")
-        database.execSQL("INSERT INTO vault_items (id, vault_id, type, name, username, notes) VALUES ('i3', 'v3', 'LOGIN', 'GitHub Account', 'dev@github.com', 'My repository')")
+        val now = System.currentTimeMillis()
+        database.execSQL("INSERT INTO vaults (id, name, description, created_at, updated_at, sync_version, sync_status) VALUES ('v3', 'Test Vault', '', $now, $now, 0, 'SYNCED')")
+        database.execSQL("INSERT INTO vault_items (id, vault_id, type, name, username, notes, email, password, url, favorite, created_at, updated_at, sync_version, sync_status) VALUES ('i3', 'v3', 'LOGIN', 'GitHub Account', 'dev@github.com', 'My repository', '', '', '', 0, $now, $now, 0, 'SYNCED')")
 
         val id = querySingleValue(database, "SELECT item_id FROM items_fts WHERE items_fts MATCH 'github'")
         assertEqualsString("i3", id)

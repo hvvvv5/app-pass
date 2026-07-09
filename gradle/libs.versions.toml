@@ -16,7 +16,7 @@ datastore = "1.2.1"
 security-crypto = "1.1.0-alpha06"
 biometric = "1.1.0"
 
-sqlcipher = "4.16.0"
+sqlcipher = "4.5.4"
 
 kotlinx-serialization = "1.8.1"
 kotlinx-coroutines = "1.10.1"

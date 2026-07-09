@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.passgo.app.core.BaseInstrumentedTest
 import com.passgo.app.core.database.dao.VaultDao
 import com.passgo.app.core.database.dao.VaultItemDao
 import com.passgo.app.core.database.entity.VaultEntity
@@ -21,7 +22,7 @@ import org.junit.runner.RunWith
 import java.util.UUID
 
 @RunWith(AndroidJUnit4::class)
-class DaoInstrumentedTest {
+class DaoInstrumentedTest : BaseInstrumentedTest() {
 
     private lateinit var database: PassGoDatabase
     private lateinit var vaultDao: VaultDao

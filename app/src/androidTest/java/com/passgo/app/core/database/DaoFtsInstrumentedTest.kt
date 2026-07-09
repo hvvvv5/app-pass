@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.passgo.app.core.BaseInstrumentedTest
 import com.passgo.app.core.database.dao.VaultItemDao
 import com.passgo.app.core.database.entity.VaultEntity
 import com.passgo.app.core.database.entity.VaultItemEntity
@@ -20,7 +21,7 @@ import java.security.SecureRandom
 import java.util.UUID
 
 @RunWith(AndroidJUnit4::class)
-class DaoFtsInstrumentedTest {
+class DaoFtsInstrumentedTest : BaseInstrumentedTest() {
 
     private lateinit var database: PassGoDatabase
     private lateinit var vaultItemDao: VaultItemDao
@@ -34,6 +35,7 @@ class DaoFtsInstrumentedTest {
 
         database = Room.inMemoryDatabaseBuilder(context, PassGoDatabase::class.java)
             .openHelperFactory(factory)
+            .addCallback(PassGoDatabase.ftsCallback)
             .build()
 
         vaultItemDao = database.vaultItemDao()
